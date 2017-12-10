@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=gbk">
+<title>视频录像存储和查看</title>
+<link href="plugin/jquery-ui-1.12.1.custom/jquery-ui.theme.min.css" rel="stylesheet"/>
+<link href="plugin/jquery-ui-1.12.1.custom/jquery-ui.structure.min.css" rel="stylesheet"/>
+<link href="plugin/jquery-ui-1.12.1.custom/jquery-ui.min.css" rel="stylesheet"/>
+<style type="text/css">
+html,body,label,a,.txtLbl {
+	margin:0px;
+	padding:0px;
+	background-color:black;
+	color:white;
+	margin: 0px;
+	padding: 0px;
+	font-size: 14px;
+}
+body{
+    overflow: hidden;
+}
+#btnPlayBack{
+	display:none;
+}
+/*#btnTest{*/
+    /*display: none;*/
+/*}*/
+.storeCtrl{
+	display:none;
+}
+/*内容的div*/
+.content {
+	margin: 0px;
+	padding: 0px;
+	color: #454545;
+}
+.txtLbl{
+	border:none;
+	border-bottom:1px dotted white;
+}
+/*左侧的视频的div*/
+#divLog {
+	display:none;
+	text-align: center;
+	float: left;
+	padding: 0px;
+	margin: 0px;
+	width: 100%;
+	background-color: white;
+}
+
+#divVedio {
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	width: 100%;
+}
+	/*进度条的样式*/
+#divPlayProgress .ui-slider-range {  background: #357EE8; }
+
+</style>
+<!--<script src="js/jquery-1.8.3.js"></script>-->
+    <script src="plugin/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
+<script src="plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js" type="text/javascript"></script>
+<script src="js/initcfg.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/ocxCommon.js"></script>
+<script type="text/javascript">
+	var spaceHeight = 230; //视频底部的高度
+    var channel = "23010100001310000002";
+    function browseFolder() {
+	    try {
+	        var Message = "\u8bf7\u9009\u62e9\u6587\u4ef6\u5939"; //选择框提示信息
+	        var Shell = new ActiveXObject("Shell.Application");
+	        var Folder = Shell.BrowseForFolder(0, Message, 64, 17); //起始目录为：我的电脑
+//	        var Folder = Shell.BrowseForFolder(0, Message, 0); //起始目录为：桌面
+	        if (Folder != null) {
+	            Folder = Folder.items(); // 返回 FolderItems 对象
+	            Folder = Folder.item(); // 返回 Folderitem 对象
+	            Folder = Folder.Path; // 返回路径
+	            /*
+	            if (Folder != null && Folder.charAt(Folder.length - 1) != "\\") {
+	                Folder = Folder + "\\";
+	            }
+	            */
+	            return Folder;
+	        }
+	    }
+	    catch (e) {
+	        alert(e.message);
+	    }
+	}
+    function showMsg(msg){
+    	$("#lblMsg").text(msg);
+    	$("#lblMsg").show();
+    	window.setTimeout(function(){
+    		$("#lblMsg").hide();
+    	},3000);
+    }
+    //获取url中的参数
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+        var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+        if (r != null) return unescape(r[2]); return null; //返回参数值
+    }
+    function log(m){
+        logstr=$("#txaContent").val();
+        logstr="\n"+m+logstr;
+        $("#txaContent").val(logstr);
+    };
+    function bodyResize() {
+        try{
+        	var height = $(window).height()-spaceHeight;
+        	var hideVedio = $("#divVedio:hidden").length;
+        	if(hideVedio != 0){
+        		height = 0;
+        	}
+        	var vedioWidth = $("#divVedio").width()-5;
+        	log("vedioWidth:"+vedioWidth);
+        	$("#divVedio").height(height);
+        	$("#mediaplayerid").height(height);
+        	$("#mediaplayerid").width(vedioWidth);
+            mediaplayerid.ITMS_CCTV_ReSizeVideoDlg(0, 0, vedioWidth, height);
+            log("画面设置大小化成功！ 自适应大小窗格 ITMS_CCTV_ReSizeVideoDlg");
+        }catch(e){
+        	log(e.message);
+        }
+    }
+    var urlParam = {};
+    function initLoadParam(){
+    	urlParam.channel = getUrlParam("channel");
+    	urlParam.t1 = getUrlParam("t1");
+    	urlParam.t2 = getUrlParam("t2");
+    	if(urlParam.channel != null){
+	    	$("#lblChannel").text(urlParam.channel);
+    	}else{
+    		urlParam = new Object();
+    		$("#txtChannel").val("");
+    		$("#txtT1").val("");
+    		$("#txtT2").val("");
+    		$("#txtTlength").val("");
+    		$("#txtDevicename").val("");
+    		showMsg("未知通道号，请选择设备！");
+    	}
+    	log("初始化参数:"+$.param(urlParam));
+    }
+    //转换时间（yyyy-MM-dd HH:mm:ss）到 UTC 格式
+    function toUTC(dateStr){
+    	var arrDateTime = dateStr.split(" ");
+    	var arrDate = arrDateTime[0].split("-");
+    	var arrTime = arrDateTime[1].split(":");
+    	var year = parseInt(arrDate[0]);
+    	var month = eval(arrDate[1])-1; //月份从 0 开始
+    	var day = eval(arrDate[2]);
+    	var hour = eval(arrTime[0]);
+    	var min = eval(arrTime[1]);
+    	var sec = eval(arrTime[2]);
+    	//showMsg(year+"-"+month+"-"+day+" "+hour+":"+min+":"+sec);
+    	var utc = Date.UTC(year,month,day,hour,min,sec,0)/1000;
+    	//北京时间相差 8 小时，减掉 8 小时
+    	utc = utc - 8*60*60;
+    	return utc;
+    }
+    //加载时间范围
+    function loadTimeRange(time1,time2){
+    	urlParam.time1 = time1;
+    	urlParam.time2 = time2;
+    	urlParam.t1 = toUTC(time1);
+    	urlParam.t2 = toUTC(time2);
+    	//urlParam.t1 = "1469832073";
+    	//urlParam.t2 = "1469832373";
+    	urlParam.tmin = (urlParam.t2 - urlParam.t1)/60.0; //视频时长,分钟数
+    	urlParam.tsize = urlParam.tmin * 43; //视频大小
+    	urlParam.tdsec = urlParam.tsize/4.7; //多少秒下载完成,下载速度 4.7MB/S
+    	urlParam.tlength = urlParam.tmin + " 分钟";
+    	$("#txtTlength").val(urlParam.tlength);
+    }
+    //设置初始化参数,被 Flex 调用的参数，Flex 调用时，是以 “,” 分隔的参数串
+    //参数数组的格式：通道号，设备名称，开始时间，结束时间，调阅方式（0：？ 1.查看 2.下载）
+    function resetParam(arrParams){
+    	var channel = arrParams[0];
+    	var devicename = arrParams[1];
+    	var time1 = arrParams[2];
+    	var time2 = arrParams[3];
+    	var dyfs = parseInt(arrParams[4]); //调用方式：1.查看 2.下载
+    	if(dyfs > 1){
+    		$(".storeCtrl").show();
+    	}else{
+    		$(".storeCtrl").hide();
+    	}
+    	//去掉毫秒
+    	if(time1.indexOf(".") != -1){
+    		time1 = time1.substring(0,time1.indexOf("."));
+    	}
+    	if(time2.indexOf(".") != -1){
+    		time2 = time2.substring(0,time2.indexOf("."));
+    	}
+    	urlParam.channel = channel;
+    	urlParam.devicename = devicename;
+		loadTimeRange(time1,time2); //设置时间
+    	var validate = true;
+    	if(urlParam.channel == null || "" == urlParam.channel || urlParam.t1 < 0 || urlParam.t2 < 0){
+    		validate = false;
+    	}
+    	if(!validate){
+    		showMsg("设备录像的参数不正确！");
+    		return;
+    	}
+    	//设置显示
+    	$("#txtChannel").val(urlParam.channel);
+    	$("#txtDevicename").val(urlParam.devicename);
+    	$("#txtT1").val(urlParam.time1);
+    	$("#txtT2").val(urlParam.time2);
+    	$("#txtTlength").val(urlParam.tlength);
+    	$("#btnPlayBack").show();
+    }
+    //注册事件响应
+    function initRegistEvent(){
+    	//自适应窗口大小
+    	$(window).on("resize", function (){
+        	bodyResize();
+        });
+        //显示日志信息
+        $("#imgLog").click(function(){
+        	$("#divLog").toggle();
+        });
+        
+        $("#btnTest").click(function(){
+        	//"1469832073","1469832373"
+        	//"1469832073", "1469832373"
+//        	resetParam(["23010100001310000002","测试设备信息","2016-07-30 06:43:00","2016-07-30 06:48:00","0"]);
+			resetParam(["23010100001310000002","测试设备信息","2016-09-28 14:00:00","2016-09-28 15:00:00","2"]);
+			/*
+            try{
+                var txt1 = mediaplayerid.ITMS_CCTV_RecordQuery(9, urlParam.channel, "2016-08-01T13:00:00", "2016-08-01T14:00:00", "64010000002100000001", "Address1", urlParam.channel, 0, 0);
+                showMsg(txt1);
+            }catch(e){
+                showMsg(e.message);
+            }
+            */
+        });
+        $("#btnStoreDir").click(function(){
+        	var dirPath = browseFolder();
+        	if("" != dirPath){
+	        	$("#txtStoreDir").val(dirPath);
+        	}
+        });
+        function validateStoreParam(){
+        	var validate = true;
+        	if(validate && urlParam.channel == null){
+        		validate = false;
+        		showMsg("通道号不能为空 ！");
+        	}else if(validate && isNaN(urlParam.t1)){
+        		validate = false;
+        		showMsg("起始时间格式不正确！");
+        	}else if(validate && isNaN(urlParam.t2)){
+        		validate = false;
+        		showMsg("终止时间格式不正确！");
+        	}else if(validate && urlParam.storeDir == ""){
+        		validate = false;
+        		alert("存储目录不能为空！");
+        	}
+        	return validate;
+        }
+        //查询时段
+        $("#btnFind").click(function(){
+        	showMsg("查询中……");
+        	try{
+        		var vcode = mediaplayerid.ITMS_CCTV_RecordQuery(9, urlParam.channel, "2016-08-08T12:06:17", "2016-08-08T15:00:17", "64010000002100000001", "Address1", urlParam.channel, 0, 0);
+        		log("查询："+vcode);
+        	}catch(e){
+        		log("查询异常："+e.message);
+        	}
+        });
+        //按钮事件注册
+    	$("#btnStore").click(function(){
+    		var storeDir = $("#txtStoreDir").val();
+    		urlParam.storeDir = storeDir;
+    		try{
+    			//验证数据
+    			var validate = validateStoreParam();
+    			if(!validate){
+    				return;
+    			}
+	    		//var txt1 = mediaplayerid.ITMS_CCTV_RecordQuery(9, channel, "2010-11-11T19:46:17", "2016-11-12T19:46:17", "64010000002100000001", "Address1", channel, 0, 0);
+	    		var txt2 = mediaplayerid.ITMS_CCTV_Download(0, 4, urlParam.channel, 6000, "", 0, "", urlParam.t1, urlParam.t2, urlParam.storeDir);
+	    		log("存储路径："+storeDir+"\n5/5.下载 ITMS_CCTV_Download" + txt2);
+	    		if(parseInt(txt2) < 0){
+	    			showMsg("存储异常！");
+	    			stopProgress();
+	    		}else{
+	    			showMsg("下载大约耗时 "+parseInt(urlParam.tdsec)+" 秒！");
+	    			playProgress(urlParam.tdsec);
+	    		}
+    		}catch(e){
+    			showMsg("存储异常："+e.message);
+    			stopProgress();
+    		}
+    	});
+    	$("#btnPlayBack").click(function(){
+    		try{
+	    		loadTimeRange(txtT1.value,txtT2.value); //设置时间
+    			var vcode = "";
+    			vcode = mediaplayerid.ITMS_CCTV_StopPreview(0);
+    			//vcode = mediaplayerid.ITMS_CCTV_PlaybackStop(0);
+    			log("回放(停止)-0:"+vcode);
+//    			vcode = mediaplayerid.ITMS_CCTV_Playback(0, urlParam.channel, 6000, "", 0, "", urlParam.t1, urlParam.t2);
+				vcode = mediaplayerid.ITMS_CCTV_K_Playback_Dialog_Setup(0, urlParam.channel, urlParam.t1, urlParam.t2, 6000, "", 0, "");
+				log("回放-1:"+vcode);
+    			if(vcode == "-1"){
+    				showMsg("播放异常！");
+    			}else{
+//	    			vcode = mediaplayerid.ITMS_CCTV_PlaybackPlay(0);
+					vcode = mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Play( 0, urlParam.t1);
+	    			log("回放-2:"+vcode);
+	    			if(vcode == "-1"){
+	    				showMsg("播放异常！");
+	    			}else{
+	    				showMsg("播放中……");
+                        playProgressCls=new PlayProgressCls("divPlayProgress","mediaplayerid",urlParam.t1,urlParam.t2);//初始化进度条
+                        playProgressCls.init();
+	    			}
+    			}
+    		}catch(e){
+    			alert(e.message);
+    		}
+    	});
+    	$("#btnProgress").click(function(){
+    		playProgress(5);
+    	});
+		/*
+		*  zxp 2016 0926
+		*  增加暂停，开始，快退 ，快进,播放进度条
+		* */
+		var cntCode="";	//log的标志
+        /* 指定倍速（-16,-8,-4,-2,-1,1/4,1/2,1,2,4,8,16) ,快进，快退，倍播*/
+		var isPlay=false;
+		$( "#btnPlay" ).click(function(){
+            if(isPlay){
+                //默认从当前位置播放
+                var cntCode=mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Play(0, -1);
+                $( "#btnPlay" ).html("暂停");
+                playProgressCls.playTime();
+                log("播放标志:"+cntCode);
+            }
+            if(!isPlay){
+                //默认从当前位置暂停
+                $( "#btnPlay" ).html("播放");
+                var cntCode=mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Pause(0, -1);
+                playProgressCls.pauseTime();
+                log("暂停标志:"+cntCode);
+            }
+            isPlay=!isPlay;
+		});
+
+		$( "#btnForword" ).click(function(){
+			var cntSpeed=8;
+			var cntCode=mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_N_Speed(0, cntSpeed);//最高速度
+			playProgressCls.playForword(2,8);
+			setTimeout(function(){
+				mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Pause(0, -1);                    //停止
+				mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Play(0, -1);
+			},2000)
+		});
+
+        $( "#selSpeed").change(function(){
+            var cntOption=$( "#selSpeed option:selected").val();
+            var cntCode=mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_N_Speed(0, cntOption);
+			playProgressCls.playMultiple(cntOption);
+            log("选择倍速标志:"+cntCode+" 当前倍速是"+cntOption);
+        });
+		$( "#btnBack" ).click(function(){
+            var cntSpeed=-8;
+            var cntCode=mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_N_Speed(0, cntSpeed);//最高速度
+			playProgressCls.playBack(2,8);
+			setTimeout(function(){
+				mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Pause(0, -1);                    //停止
+				mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Play(0, -1);                     //正常播放
+			},2000);
+		});
+//		$( "#btnStop" ).click(function(){
+//			var cntCode=mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_TearDown(0);
+//			log("停止标志:"+cntCode);
+//		});
+        /**指定在什么秒数*/
+        $( "#btnCutSecond").click(function(){
+            mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Play(0,3000);
+        });
+        /**单帧播放*/
+        $( "#btnOneFrame").mousedown(function(){
+            var cntSpeed=1/4;
+            mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Pause(0, -1);
+            mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_N_Speed(0, cntSpeed);                //正常速度的1/4
+        });
+        $( "#btnOneFrame").mouseup(function(){
+            mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Play(0, -1);                     //播放
+            setTimeout(function(){
+                mediaplayerid.ITMS_CCTV_K_Playback_ControlCommand_Pause(0, -1);                    //停止
+            },1000)
+        });
+
+    }
+    var clock = null;
+    var clockSec = 0; //当前秒钟数
+    var clockT = 0; //总秒数
+	var playProgressCls = null; //进度条类
+    //下载的进度条
+    function playProgress(t){
+    	clockSec = 0;
+    	clockT = t;
+    	if(clock != null){
+    		window.clearInterval(clock);
+    	}
+    	$("#divProgressFill").css("width","0");
+    	$("#divProgressFill").text("");
+    	clock = setInterval(function(){
+    		clockSec ++;
+    		if(clock != null && clockT <= clockSec){
+    			window.clearInterval(clock);
+    		}
+    		var percent = parseInt(clockSec/clockT*10000)/100.0;
+    		if(percent > 100){
+    			percent = 100;
+    		}
+    		$("#divProgressFill").css("width",percent+"%");
+    		$("#divProgressFill").text("存储进度："+percent+"%，剩余大约耗时："+parseInt(clockT-clockSec)+"秒");
+    	},1000);
+    }
+    //停止进度条
+    function stopProgress(){
+		clockSec = 0;
+    	clockT = t;
+    	if(clock != null){
+    		window.clearInterval(clock);
+    	}
+    	$("#divProgressFill").css("width","100%");
+    	$("#divProgressFill").text("");
+    }
+
+    //初始化 ocx 控件，进行初始化方法
+    function initOcx(){
+	    try{
+	     	var vcode = "";
+	   		$("#txaContent").val("");
+	    	vcode = mediaplayerid.ITMS_CCTV_MediaInit(ocx_userid, ocx_clientip, ocx_clientport, ocx_userpwd, ocx_serverip, ocx_serverid, ocx_serverport);
+		    log("视频播放初始化成功！"+"1/4.初始化 ITMS_CCTV_MediaInit 返回："+vcode);
+		    vcode = mediaplayerid.ITMS_CCTV_MediaRegister(1800);
+		    log("视频注册初始化成功！"+"2/4.注册 ITMS_CCTV_MediaRegister 返回："+vcode);
+		    mediaplayerid.ITMS_CCTV_ScreenSwitch(1, 0);
+		    log("媒体画面切换化成功！"+"4/4.切换窗格 ITMS_CCTV_ScreenSwitch");
+	    }catch(e){
+	    	log("ocx 准备异常："+e.message);
+	    }
+    }
+    $(document).ready(function(){
+    	bodyResize();
+    	//0.初始化方法
+    	initLoadParam();
+    	//1.注册事件
+    	initRegistEvent();
+    	//2.准备 ocx 控件
+	   	initOcx();
+
+	    //mediaplayerid.ITMS_CCTV_RegisterAndPreview(1800, 0,channel, 6000, "",0, "");
+		//log("请求视频成功4/4.初始化 ITMS_CCTV_RegisterAndPreview");
+    });
+	$(window).on("beforeunload", function () {
+        try {
+        	//停止
+            mediaplayerid.ITMS_CCTV_StopPreview(0);
+        	log("停止视频成功！销毁(1/4)");
+            //注销
+            mediaplayerid.ITMS_CCTV_MediaUnRegister();
+            log("注销 OCX 成功！销毁(2/4)");
+            //释放
+            mediaplayerid.ITMS_CCTV_FreeScreen();
+            log("释放屏幕成功！销毁(3/4)");
+            //释放
+            mediaplayerid.ITMS_CCTV_MediaFree();
+            log("释放媒体成功！销毁(4/4)");
+        } catch (e) {
+            log("退出OCX:"+e.message);
+        }
+    });
+    </script>
+<script language="javascript" for="mediaplayerid"
+	event="OnDownloadRecordEndEx(deviceId,downloadFlag)"
+	type="text/javascript"> 
+   	//注意：不能使用 alert 弹框，它会终止 ocx 进程
+   	if(downloadFlag == "0"){
+   		$("#btnStore").attr("disabled",true);
+    	log("开始下载……" + deviceId);
+    	showMsg("正在存储中，请耐心等待！");
+   	}else if(downloadFlag == "0"){
+   		$("#btnStore").attr("disabled",false);
+   		log("下载完成！ 设备：" + deviceId);
+   		showMsg("存储完成，请到指定文件夹中查看！");
+   	}else{
+   		$("#btnStore").attr("disabled",false);
+   	}
+</script>
+<script src="js/progressbar.js" type="text/javascript"></script>
+<SCRIPT FOR=mediaplayerid EVENT=OnRecordInfo_Query_Result(pxml)>
+ITMS_CCTV_RecordQuery_Handler(pxml); //方法调用
+</SCRIPT>
+</head>
+<body>
+	<div style="text-align:left;padding-left:10px;">
+		<div style="width:50%;text-align:left;float:left;">
+			<label>视频回放</label>
+			<img id="imgLog" src="img/empty.gif">
+		</div>
+		<div style="width:50%;text-align:right;float:left;">
+			<a href="tip.html">帮助</a>
+		</div>
+	</div>
+	<div id="divLog">
+		<textarea id="txaContent" rows="5" style="width:95%;"></textarea>
+	</div>
+	<!-- 显示数据 -->
+	<div id="divContent">
+		<div id="divVedio">
+			<OBJECT ID="mediaplayerid" style="width:100%;border:1px solid green;padding:0px;margin:0px;" 
+					CLASSID="CLSID:8E46037B-3676-4065-AC5A-671E86A82870"></OBJECT>
+            <!--下载进度条-->
+            <div id="divProgress" class="storeCtrl" style="font-size:12px;color:yellow;margin-top:-1px;margin-left:2px;margin-right:-10px;margin-top:3px;text-align:left;height:15px;width:99%;border:1px green solid;">
+                <div id="divProgressFill" style="white-space:nowrap;height:100%;width:0%;background-color:green;">
+                </div>
+            </div>
+            <!--播放进度条-->
+            <div style="margin:5px 10px 5px 10px;">
+                <div id="divPlayProgress"></div>
+            </div>
+
+			<div id="divToolBar" style="font-size:12px;text-align:center;width:99%;">
+				<button id="btnPlay">暂停</button>
+				<button id="btnBack">快退</button>
+                <!--<button id="btnCutSecond">test指定秒播放</button>-->
+				<button id="btnForword">快进</button>
+				<!--<button id="btnStop">停止</button>-->
+				<!--<button id="btnSpeed">倍速</button>-->
+                <!---16,-8,-4,-2,-1,1/4,1/2,1,2,4,8,16-->
+                <select id="selSpeed">
+                    <option value="">选择倍速</option>
+                    <option value="1"> x1倍  </option>
+                    <option value="2"> x2倍  </option>
+                    <option value="4"> x4倍  </option>
+                    <option value="8"> x8倍  </option>
+                    <option value="16"> x16倍 </option>
+                    <option value="0.5"> x1/2 倍</option>
+                    <option value="0.25"> x1/4 倍</option>
+                </select>
+                <!--<button id="btnOneFrame">单帧</button> -->
+			</div>
+			<div style="padding:0px;margin-top:5px;text-align:left;">
+				<div class="storeCtrl" style="float:left;width:70%;text-align:left;">
+					<label class="storeCtrl">存储到</label>
+					<input class="storeCtrl" id="txtStoreDir" type="text" value="D:\Record" style="width:50%"/>
+					<button  class="storeCtrl" id="btnStoreDir">选择...</button>
+					 &nbsp;
+				</div>
+				<div style="float:left;width:30%;text-align:left;">
+<!-- 					<button id="btnFind">查询</button> -->
+					<button id="btnStore" class="storeCtrl">存储</button>
+
+<!-- 					<button id="btnProgress">进度</button> -->
+				</div>
+				<br/>
+			</div>
+				<br/>
+			<div style="display:block;text-align:left;">
+				通&nbsp;道&nbsp;号：<input id="txtChannel" type="text" class="txtLbl" readonly/><br/>
+				设备名称：<input id="txtDevicename" type="text" class="txtLbl" readonly/><br/>
+				开始时间：<input id="txtT1" type="text" class="txtLbl" readonly/><br/>
+				结束时间：<input id="txtT2" type="text" class="txtLbl" readonly/><br/>
+				总&nbsp;时&nbsp;长：<input id="txtTlength" type="text" class="txtLbl" readonly/>
+				<button id="btnPlayBack">回放</button>
+ 				<!--<button id="btnTest">设值</button> <h3 id="testH" style="display: inline-block">test</h3>
+                <h3  id="testH2" style="display: inline-block;"></h3>-->
+				<br/>
+			</div>
+			<div id="lblMsg" style="color:yellow;text-align:center;">
+			</div>
+		</div>
+	</div>
+</body>
+</html>

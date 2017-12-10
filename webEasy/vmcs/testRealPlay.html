@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>卡口实时播放</title>
+		<style type="text/css">
+		*{margin: 0;padding: 0;}
+		body{margin: 8px;}
+		select{width: auto;padding: 0 1%;}
+		select option{text-align: center;}
+		</style>
+		<script src="../js/jquery-1.8.3.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/bocojs/dhocxcfg.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/RealPlay.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body style="font-size: 12px;">
+		<div id="title">
+			<label for="td">卡口：</label>
+			<select name="td" id="kkh">
+				<option value="test20160616">001</option>
+				<option value="test001">002</option>
+				<option value="test201612072">003</option>
+				<option value="test">004</option>
+			</select>
+			<input type="button" id="btnTransKK" value="播放" style="margin-left: 5px; width: 54px;"/>
+		</div>
+		<iframe src="iframe_realPlay.html" name="fff" width="530" height="450" id="ifram"></iframe>
+	</body>
+</html>

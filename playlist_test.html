@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="gbk" />
+<title>test</title>
+<style>
+.test{list-style:decimal outside none;}
+#olList li{
+	width:100%;
+}
+#olList li span{
+	width:60%;
+}
+</style>
+<script src="js/jquery-1.8.3.js" type="text/javascript"></script>
+<script src="js/bocojs/playlist.js" type="text/javascript"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var playUtil = new PlayListUtil(null,"btnPlay","selPlayList","olList",4,"txtSleep");
+		$("#btnPlay").click(function(){
+			playUtil.autoPlay();
+		});
+		$(".btnScreen").click(function(){
+			playUtil.setPageSize(parseInt($(this).attr("cnt")));
+		});
+		
+		$("#selPlayList").on("change",function(){
+			var valSelected = $("#selPlayList option:selected").val();
+			if(valSelected == ""){
+				$("#olList").html("");
+			}else{
+				$("#olList").html($("#olList"+valSelected).html());
+			}	
+			playUtil.changePlayList();
+		});
+	});
+</script>
+</head>
+<body style="border:1px solid red">
+<select id="selPlayList">
+	<option value="" lbl="-- 请选择播放列表 --" >-- 请选择播放列表 --</option>
+  <option value="1" lbl="轮播列表1">轮播列表1</option>
+	<option value="2" lbl="轮播列表2">轮播列表2</option>
+</select>
+轮播间隔：
+<input id="txtSleep" value="1000"/>
+<button id="btnPlay">play</button>
+<button class="btnScreen" cnt="1">1 分屏</button>
+<button class="btnScreen" cnt="3">3 分屏</button>
+<button class="btnScreen" cnt="4">4 分屏</button>
+<button class="btnScreen" cnt="25">25 分屏</button>
+<ol id="olList" class="test">
+</ol>
+<textarea id="txaLog" rows="30" style="width:100%;">
+</textarea>
+<ol id="olList1" style="display:none;">
+	<li channel="01"><span>列表项一</span></li>
+	<li channel="02"><span>列表项二</span></li>
+	<li channel="03"><span>列表项三</span></li>
+	<li channel="04"><span>列表项4</span></li>
+	<li channel="05"><span>列表项5</span></li>
+</ol>
+<ol id="olList2" style="display:none;">
+	<li channel="11"><span>列表项一</span></li>
+	<li channel="12"><span>列表项二</span></li>
+	<li channel="13"><span>列表项一</span></li>
+	<li channel="14"><span>列表项二</span></li>
+	<li channel="15"><span>列表项一</span></li>
+	<li channel="16"><span>列表项二</span></li>
+</ol>
+</body>
+</html>
+			

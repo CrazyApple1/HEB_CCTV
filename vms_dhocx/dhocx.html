@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--引用的外部的样式-->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>监控录像回放系统</title>
+    <link rel="stylesheet" type="text/css" href="../css/bocoCss/MyVideo.css">
+    <link href="../css/jquery-ui.css" type="text/css" rel="stylesheet"/>
+    <link href="../css/layout-default.css" type="text/css" rel="stylesheet"/>
+
+    <link href="../css/bocoCss/frameInit.css" type="text/css" rel="stylesheet"/>
+
+    <!--引用的外部框架jquery,jquery ui,jquery layout,juqery-ztree开源框架-->
+    <script type="text/javascript" src="../js/jquery-1.8.3.js"></script>
+    <script type="text/javascript" src="../js/jquery.layout.js"></script>
+    <script type="text/javascript" src="../js/jquery-ui.js"></script>
+
+    <!-- 引用日期插件 -->
+    <script type="text/javascript" src="../js/laydate/laydate.dev.js"></script>
+
+    <!--引用当前页面js，css-->
+    <script type="text/javascript" src="../js/bocojs/dhocxcfg.js"></script>
+    <script type="text/javascript" src="../js/bocojs/videoIndex.js"></script>
+
+ 
+</head>
+<body style="font-size:12px;color:#464646;">
+<!--头部-->
+<!-- <div class="ui-layout-north">
+    <div style="width:100%;height:100%;background-color:#f0f0f0; ">
+        <div style="width:65%;float:left;font-size: 20px;font-weight: bold;margin-top: 10px;margin-left: 16px;">监控录像回放系统</div>
+    </div>
+</div> -->
+<!--视频播放部分-->
+<div id="divCenter" class="ui-layout-center" style="position: relative;">
+    <div class="ui-layout-center" >
+        <div id="ocxContain" style="width: 100%; height: 100%;overflow: hidden;">
+            <OBJECT id="dhMediaPlayerId" WIDTH="100%" HEIGHT="100%"
+                    CLASSID="CLSID:94F5E9A5-6AA6-4D75-9321-C085E8209DFF">
+            </OBJECT>
+        </div>
+        <div style="width:100%;height: 100%;position: absolute;left: 0;top: 0;border:1px solid gray;z-index: 2;background-color: #1E1E1E;">
+           
+        </div>
+    </div>
+    <!-- 下边：播放控制部分-->
+    <div class="ui-layout-south">
+        <ul id="tabsbottom">
+            <li><button id="btnVideoPlay">实时预览</button></li>
+            <li><button id="btnVideoStop">停止实时预览</button></li>
+            <li><button id="btnVideoPlayBack">播放历史视频</button></li>
+            <li><button id="btnVideoStopBack">停止回放</button></li>
+            <li><button id="btnChangeVideoSize">改变视频大小</button></li>
+        </ul>
+    </div>
+</div>
+
+<!--左边：播放列表；-->
+<div class="ui-layout-west">
+    <div id="tabsleft" style="overflow:hidden;">
+        <div style="background: #e1e1e1; overflow:hidden;">
+            <!--"padding-left:42px;"-->
+            <ul style="padding:10px 0 0 24px;">
+                <li id="tabsleft1"><a href="#tabs-1">播放列表</a></li>
+            </ul>
+        </div>
+        <div id="tabs-1" style="padding:0 10px 10px;">
+            <!--播放列表-->
+            <div id="tabs-1-search" style="padding-top:10px;align:center;">
+                <label id="lblPosition" ></label>
+                <input type="search" id="txtSearch" placeholder="搜索录像..."
+                       style="width:120px;font-size:16px;text-indent:5px;  border-radius:2px;border:1px #c6c6c6 solid;"/> &nbsp;
+                <input id="btnSearch" type="button" value="查找" style="font-size:16px;cursor: pointer; border-radius:2px;border:1px #c6c6c6 solid;"/>&nbsp;
+                <img id="btnRefreshTree" alt="刷新" style="vertical-align: middle;" src="../image/tree/refresh.gif"/>
+            </div>
+            <div id="divTreeContainer" style="overflow:auto;width:100%;">
+                <ul id="treedevice" class="ztree"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 播放历史视频弹窗 -->
+<div id="historyWindow">
+	<div style="margin: 10px 0;font-size: 14px;font-weight: bold;text-align: center;">播放历史视频</div>
+	<ul>
+		<li><div class="date1">日期：<input type="text" id="J-xl"></div></li>
+		<li><div class="date2">起始播放时间：<input type="text" id="starthours" maxlength="2"><span>时</span><input type="text" id="startminutes" max="60" min="0" maxlength="2"><span>分</span><input type="text" id="startseconds" max="60" min="0" maxlength="2"><span>秒</span></div>&nbsp;&nbsp;</li>
+		<li><div class="date3">结束播放时间：<input type="text" id="endhours"><span>时</span><input type="text" id="endminutes"><span>分</span><input type="text" id="endseconds"><span>秒</span></div>&nbsp;&nbsp;</li>
+        <li><div class="date4">ChannelID：<input type="text" id="channelID"></div></li>
+	</ul>
+	<div class="yesOrNot">
+		<button id="sure">确定</button>
+		<button id="cancel">取消</button>	
+	</div>
+</div>
+
+<!-- 改变宽高 -->
+<div id="changeWindow">
+    <div style="margin: 20px 0;font-size: 14px;font-weight: bold;text-align: center;">改变视频大小</div>
+    <ul>
+        <li><div class="widths">宽：<input type="text" id="changeWidth"></div></li>
+        <li><div class="heights">高：<input type="text"  id="changeHeight"></div></li>
+    </ul>
+    <div class="yesOrNots">
+        <button id="sures">确定</button>
+        <button id="cancels">取消</button> 
+    </div>
+</div>
+</body>
+</html>

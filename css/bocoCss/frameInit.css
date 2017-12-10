@@ -1,0 +1,47 @@
+body {
+    /*font: 62.5% "Trebuchet MS", sans-serif;*/
+    font-family:"微软雅黑",sans-serif;
+    margin: 10px;
+}
+
+.ui-layout-center, /* has content-div */ .ui-layout-west,
+    /* has Accordion */ .ui-layout-east, /* has content-div ... */
+.ui-layout-east .ui-layout-content { /* content-div has Accordion */
+    padding: 0;
+    overflow: hidden;
+}
+
+.ui-layout-north {
+    padding: 0;
+    /* center-container inset will be created by an inset option */
+    margin: 0;
+}
+/*改变显示数据的变化的框的大小*/
+.ui-widget-content {
+    border: none;
+}
+/*设置ul的宽度*/
+.ulInBorder{
+    width: 80px;
+    border: 1px solid #c6c6c6;
+    border-radius:2px;
+}
+
+/*提价按钮的设置样式*/
+#btnCirTime{
+    color:#464646;
+}
+
+
+#btnCirTime:hover{
+    background:#0580ff ;
+    color: white;
+    font-weight: bold;
+}
+
+#btnSearch:hover{
+    background:#0073ea;
+    color: white;
+    font-weight: bold;
+}
+

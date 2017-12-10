@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../css/flatpickr.min.css"/>
+		<script src="../js/jquery-1.8.3.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/flatpickr.min.js" type="text/javascript" charset="utf-8"></script>
+	</head>
+	<body>
+		<input class="flatpickr" id="date">
+		<input class="flatpickr" id="time" data-enable-time=true data-enable-seconds=true data-no-calendar=true data-allow-input=true>
+	</body>
+	<script type="text/javascript">
+		var WshShell=new ActiveXObject("WScript.Shell");
+			//添加信任站点ip
+		WshShell.RegWrite("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\Ranges\\Range100","");
+		WshShell.RegWrite("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\Ranges\\Range100\\http","2","REG_DWORD");
+		WshShell.RegWrite("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\Ranges\\Range100\\:Range","192.168.1.5");
+//		Flatpickr.l10n.weekdays.shorthand = ['周天','周一', '周二', '周三', '周四', '周五', '周六'];
+//		Flatpickr.l10n.months.longhand=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月']
+//		$("#date").flatpickr();
+//		$("#time").flatpickr();
+	</script>
+</html>

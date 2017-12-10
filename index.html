@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--引用的外部的样式-->
+    <meta http-equiv="Content-Type" content="text/html;charset=gbk">
+    <title>视频监控子系统</title>
+    <link rel="stylesheet" href="css/zTreeStyle/zTreeStyle.css" type="text/css"/>
+    <link href="css/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <link href="css/layout-default.css" rel="stylesheet" type="text/css"/>
+    <!--自定义的样式表-->
+    <link href="css/bocoCss/boco-bg.css" rel="stylesheet" type="text/css"/>
+    <link href="css/bocoCss/frameInit.css" rel="stylesheet" type="text/css"/>
+   
+    <link href="css/bocoCss/elementStyleCircle.css" rel="stylesheet" type="text/css"/>
+    <!--引用的外部框架jquery,jquery ui,jquery layout,juqery-ztree开源框架-->
+    <script src="js/jquery-1.8.3.js" type="text/javascript"></script>
+    <script src="js/jquery.layout.js" type="text/javascript"></script>
+    <script src="js/jquery-ui.js" type="text/javascript"></script>
+    <script src="js/ztree/jquery.ztree.core.js" type="text/javascript"></script>
+    <script src="js/ztree/jquery.ztree.excheck.js" type="text/javascript"></script>
+    <script src="js/ztree/jquery.ztree.exhide.js" type="text/javascript"></script>
+    <script src="js/ztree/jquery.ztree.exedit.js" type="text/javascript"></script>
+	<link href="css/bocoCss/elementStyle.css" rel="stylesheet" type="text/css"/>
+    <!--外部的对话框-->
+    <link rel="stylesheet" href="js/artDialog6.0.4/css/ui-dialog.css" type="text/css">
+    <!--测试的js-->
+    <!--<script src="js/bocoServicelogic/devicepollDemo.js"></script>-->
+    <!--内部js代码,业务逻辑部分-->
+    <script src="js/bocoServicelogic/devicepoll.js" type="text/javascript"></script>
+    <script src="js/bocoServicelogic/common.js" type="text/javascript"></script>
+    <script src="js/bocojs/tooljs.js" type="text/javascript"></script>
+    <!--基本的配置文件-->
+    <script src="webEasy/js/initcfg.js" type="text/javascript"></script>
+    <script src="js/bocojs/config.js" type="text/javascript"></script>
+    <script src="js/bocojs/globalVars.js" type="text/javascript"></script>
+    <!--核心的js代码-->
+    <script src="js/bocojs/rights.js" type="text/javascript"></script>
+    <script src="js/bocojs/index.js" type="text/javascript"></script>
+    <script src="js/bocojs/menu.js" type="text/javascript"></script>
+    <script src="js/bocojs/playlist.js" type="text/javascript"></script>
+    <script src="js/artDialog6.0.4/dist/dialog-plus.js" type="text/javascript"></script>
+  
+</head>
+<body style="font-size:12px;color:#464646;overflow-y:scroll;">
+<!--头部-->
+<div class="ui-layout-north">
+    <div style="width:100%;height:100%;background-color:#f0f0f0; ">
+        <div style="width:65%;float:left;">
+            <img src="image/headname.png"/>
+				<textarea id="lblInfo" rows="3"
+                          style="width:40%;position:absolute;top:0px;right:150px;display: none;"></textarea>
+        </div>
+        <div style="float:right;margin-right:20px;margin-top:10px;">
+
+            <img src="image/user.png"/><label id="lblUserId"
+                                              style="width:100px;padding:10px"> 张三 </label>
+            <img id="imgDebug" src="image/pics/empty.gif"/>
+            <!--<img-->
+            <!--src="image/loginout.png" /> <label style="padding:10px">退出</label>-->
+            <!--测试userid-->
+        </div>
+    </div>
+</div>
+<!--视频播放部分-->
+<div class="ui-layout-center">
+    <div id="ocxContain" style="width: 100%; height: 100%;">
+        <OBJECT ID="mediaplayerid" WIDTH="100%" HEIGHT="100%"
+                CLASSID="CLSID:8E46037B-3676-4065-AC5A-671E86A82870">
+        </OBJECT>
+    </div>
+    <div style="margin:10px;padding:30px;border:1px solid gray;">
+        <span id="spanOcxTag" style="padding:10px;font-size:12px;color:red;width:100%;text-align:center">提示：您当前的媒体播放器不能正常工作。</span>
+        <ol style="font-size:12px;color:black;padding:30px;display:block;">
+            <li>请确保您使用的浏览器是 IE8+ 以上，兼容 IE8,9,10,11 浏览器。</li>
+            <li>请确保您在安装过程中关闭浏览器。</li>
+            <li>请确保您已经安装好 OCX 媒体播放器。若没安装，请<a href="webEasy/setup.exe" target="_blank">下载</a>并安装，安装完成后请刷新或重新打开 IE。</li>
+        </ol>
+        <sub>亿阳信通股份有限公司-城市交通产品线</sub>
+    </div>
+</div>
+<!--<object id="mediaplayerid" width="100%" height="100%" classid="clsid:8E46037B-3676-4065-AC5A-671E86A82870"></object> -->
+<!--右边：播放控制部分-->
+<div class="ui-layout-east">
+    <h3 style="margin:10px;">视频控制</h3>
+    <div style=" margin-left: 25px;">
+        <button id="btnCloseVideo">关闭选中视频</button>
+        <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" id="getPicShot"  role="button"><span class="ui-button-text">截图</span></button>
+    </div>
+    <div id="saveWin" style="margin-top:5px;display:none;">
+        <label style="margin-left:10px;">保存路径：</label>
+        <div style="padding:0 3%;">
+        	<input type="text" id="inputUrl" value="" style="width:100%;height:12px;"/>
+        </div>
+        <div style="margin-top:5px;margin-left:10px;">
+        	<button id="save_Btn" style="border:1px solid #dddddd;color:#0073ea;font-weight:bold;background:#f6f6f6 url('images/ui-bg_highlight-soft_100_f6f6f6_1x100.png') 50% 50% repeat-x;">保存</button>
+        	<button id="cancel_Btn" style="border:1px solid #dddddd;color:#0073ea;font-weight:bold;background:#f6f6f6 url('images/ui-bg_highlight-soft_100_f6f6f6_1x100.png') 50% 50% repeat-x;">取消</button>
+        </div>
+    </div>
+    <h3 style="margin:10px 10px 0 10px;">分屏控制</h3>
+    <div id="imagesetscreen">
+        <!--<a href="#" src="image/radioscreen1_nomal.png"></a>-->
+        <img id="imagesetscreen1" class="imagesetscreen imagesetscreen1"
+             src="image/radioscreen1_normal.png" title="设置一分屏" cnt="1"/> 
+        <img id="imagesetscreen4" class="imagesetscreen imagesetscreen2"
+            src="image/radioscreen4_normal.png" title="设置四分屏" cnt="4"/>
+    </div>
+    <div id="turnplayTime" style="margin-left:10px;margin-top:10px;font-size: 16px;vertical-align: middle; display: none;">
+        <label id="positionDiaScreen">轮询时间: </label><input id="txtSleep" class="m-input-common" size="5" type="text"
+                                                           name="hit_value" value="30" placeholder="输入数字"
+                                                           onkeyup="this.value=this.value.replace(/[^0-9\.]/,'')"
+                                                           onkeydown="this.value=this.value.replace(/[^0-9\.]/,'')"
+                                                           >&nbsp;秒
+        <button id="btnCirTime" style="font-size:16px;margin-left:10px; border-radius:2px;border:1px #c6c6c6 solid;">提交</button>
+    </div>
+    <br/>
+    <h3 style="margin:0 10px 10px 10px;">云台预置位控制</h3>
+    <div style="text-align: center;margin-top: 10px;margin-bottom: 20px">
+        <form>
+            <div id="radioPreSet">
+                <input class="small-button" type="radio" id="radioPreSet1" name="radio" value="15" ><label for="radioPreSet1">设置1</label>
+                <input class="small-button" type="radio" id="radioPreSet2" name="radio" value="16"><label for="radioPreSet2">设置2</label>
+                <input class="small-button" type="radio" id="radioPreSet3" name="radio" value="17"><label for="radioPreSet3">设置3</label>
+                <input class="small-button" type="radio" id="radioPreSet4" name="radio" value="18"><label for="radioPreSet4">设置4</label>
+            </div>
+        </form>
+    </div>
+    <!--鼠标按下的时候开始进行PZ控制，鼠标起来的时候停止,向上控制按钮-->
+    <center>
+        <div class="mygrid">
+            <div class="myrow">
+                <div class="mycell">
+                    <img src="image/con01.gif"/>
+                </div>
+                <div class="mycell">
+                    <img id="PTZtop" src="image/con02.gif" ptz="2"
+                         onmouseover="this.src = 'image/con020.gif'"
+                         onMouseOut="this.src = 'image/con02.gif'; "/>
+                </div>
+                <div class="mycell">
+                    <img src="image/con03.gif"/>
+                </div>
+            </div>
+            <div class="myrow">
+                <div class="mycell">
+                    <img id="PTZleft" ptz="0" src="image/con04.gif"
+                         onmouseover="this.src = 'image/con040.gif'; "
+                         onmouseout="this.src = 'image/con04.gif';"/>
+                </div>
+                <div class="mycell">
+                    <img src="image/con05.gif"/>
+                </div>
+                <div class="mycell">
+                    <img id="PTZright" ptz="1" src="image/con06.gif"
+                         onmouseover="this.src = 'image/con060.gif'"
+                         onMouseOut="this.src = 'image/con06.gif'"/>
+                </div>
+            </div>
+            <div class="myrow">
+                <div class="mycell">
+                    <img src="image/con07.gif"/>
+                </div>
+                <div class="mycell">
+                    <img id="PTZbelow" src="image/con08.gif" ptz="3"
+                         onMouseOver="this.src = 'image/con080.gif'"
+                         onMouseOut="this.src = 'image/con08.gif'"/>
+                </div>
+                <div class="mycell">
+                    <img src="image/con09.png"/>
+                </div>
+            </div>
+        </div>
+    </center>
+    <div style="padding: 0px;margin: 0px;margin-top:10px; ">
+        <div style="height:24px;vertical-align: middle;">
+            <label style="line-height:24px;margin-left:55px;font-size:13px;">大小</label>
+            &nbsp;&nbsp;
+            <img id="imgLeftSmall" ptz="5" src="image/subtract.png" style="vertical-align: middle" />
+            <img id="imgRightLarge" ptz="4" src="image/add.png" style="margin-left:30px;vertical-align: middle;"/>
+        </div>
+        <div style="height:24px;vertical-align: middle;">
+            <label style="line-height:24px;margin-left:55px;font-size:13px;">光圈</label>
+            &nbsp;&nbsp;
+            <img id="imgLeftAperture" ptz="22" src="image/subtract.png" style="vertical-align: middle" />
+            <img id="imgRightAperture" ptz="21" src="image/add.png" style="margin-left:30px;vertical-align: middle;"/>
+        </div>
+        <div style="height:24px;vertical-align: middle;">
+            <label style="line-height:24px;margin-left:55px;font-size:13px;">焦距</label>
+            &nbsp;&nbsp;
+            <img id="imgLeftFocus" ptz="24" src="image/subtract.png" style="vertical-align: middle" />
+            <img id="imgRightFocus" ptz="23" src="image/add.png" style="margin-left:30px;vertical-align: middle;"/>
+        </div>
+    </div>
+    <div style="text-align: center;margin-top: 20px;">
+        <form>
+            <div id="radioPreCall">
+                <input class="small-button" type="radio" id="radioPreCall1" name="radio" value="15"><label for="radioPreCall1">调用1</label>
+                <input class="small-button" type="radio" id="radioPreCall2" name="radio" value="16"><label for="radioPreCall2">调用2</label>
+                <input class="small-button" type="radio" id="radioPreCall3" name="radio" value="17"><label for="radioPreCall3">调用3</label>
+                <input class="small-button" type="radio" id="radioPreCall4" name="radio" value="18"><label for="radioPreCall4">调用4</label>
+            </div>
+        </form>
+    </div>
+</div>
+<!--左边：设备列表；视频轮播-->
+<div class="ui-layout-west">
+    <div id="tabsleft" overflow="hidden">
+        <div >
+            <ul>
+                <li id="tabsleft1" style="width:28%;text-align:center;"><a href="#tabs-1" style="padding: 0.5em 0.5em;">设备列表</a></li>
+                <!--style="display: none;"-->
+                <li id="tabsleft2" style="width:28%;text-align:center;"><a href="#tabs-2" style="padding: 0.5em 0.5em;">锁定列表</a></li>
+                <li id="tabsleft3" style="width:28%;text-align:center;"><a href="#tabs-3" style="padding: 0.5em 0.5em;">设备轮播</a></li>
+             	<li id="tabsleft4" ><img id="btnRefreshTree1" alt="刷新" style="padding-top:8px;padding-left:3px;display:none;" src="image/tree/refresh.gif"/></li>
+            </ul>
+        </div>
+        <div id="tabs-1" style="padding:10px;">
+            <!--设备列表-->
+            <div id="tabs-1-search" style="align:center;">
+                <label id="lblPosition" ></label>
+                <input type="search" id="txtSearch" placeholder="搜索设备..."
+                       style="width:120px;font-size:16px;text-indent:5px;  border-radius:2px;border:1px #c6c6c6 solid;"/> &nbsp;&nbsp;
+                <input id="btnSearch" type="button" value="查找" style="font-size:16px;cursor: pointer; border-radius:2px;border:1px #c6c6c6 solid;"/>&nbsp;
+                <img id="btnRefreshTree" alt="刷新" style="vertical-align: middle;" src="image/tree/refresh.gif"/>
+            </div>
+            <div id="divTreeContainer" style="overflow:auto;width:100%;">
+                <ul id="treedevice" class="ztree"></ul>
+            </div>
+        </div>
+        <div id="tabs-2" style="border:none;">
+            <div>
+                <div id="divLiContainer" style="overflow:auto;width:100%;">
+                     <ol id="olPlayList"></ol>
+                </div>
+            </div>
+        </div>
+        <!--  -->
+        <div id="tabs-3" style="border:none;">
+            <!--设备轮播-->
+            <div id="tabs-3-treedevicepoll" style="align:left;padding:0px;">
+                <label id="lblTimeInfo" title="切换画面倒计时" width="100">&nbsp;</label>
+                <select id="selPlayList" style="font-size:14px;  border-radius:2px;border:1px #c6c6c6 solid;width:75%;">
+                    <option value="blind">--请选择轮播列表--</option>
+                </select>
+                &nbsp;&nbsp;
+                <img id="btnStartPlayList" src="image/icon_play.png"
+                     style="width:20px;height:20px;vertical-align:middle;" title="开始轮播/停止轮播">
+                <img id="btnRefreshPlayList" title="刷新" style="vertical-align: middle;" src="image/tree/refresh.gif"/>
+                <label id="lblPositionRota"></label>
+                <div id="divLiContainer" style="width:100%;">
+                    <ol id="turnPlayList" style="overflow-y:auto;height:100%;"></ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 树设备的右键菜单 -->
+<div id="divTreeRMenu">
+    <ul id="ulTreeRMenu">
+        <li id="liTreeView"><img alt="查看" src="image/tree/leaf.gif"/>查看</li>
+        <li id="liTreeAdd"><img alt="锁定" src="image/tree/lock_self.png"/>锁定</li>
+        <li id="liTreeRemove"><img alt="解锁" src="image/tree/unlock.png"/>解锁</li>
+        <li id="liTreeNewWeb"><img alt="警情录入" src="image/tree/leaf.gif"/>警情录入</li>
+        <li id="liTreeState"><img alt="设备状态录入" src="image/tree/leaf.gif"/>设备状态录入</li>
+    </ul>
+</div>
+<!-- 轮播列表的右键菜单 -->
+<div id="divRotationRMenu">
+    <ul id="ulTreeMenu">
+        <li id="liRotationNewWeb"><img alt="警情录入" src="image/tree/leaf.gif"/>警情录入</li>
+        <li id="liRotationState"><img alt="设备状态录入" src="image/tree/leaf.gif"/>设备状态录入</li>
+    </ul>
+</div>
+<!--对话框的效果-->
+<div id="dialog-confirm" title="设定休眠时间" style="overflow: hidden;font-size: 10px;text-align: center;">
+    <p><input type="number" min="0" max="100" style="width:50px;height:50px;"/></p>
+</div>
+<!--父节点点击查询子节点-->
+<div id="divQS" style="display:none;">
+    <input id="ipQS" type="text" placeholder="搜索..." class="m-input-QS"  >
+</div>
+<div id="divLock">
+    <ul>
+        <li id="liLockSelf" style="display: none;"><img alt="解锁" src="image/tree/lock_self.png"/>解锁</li>
+        <li id="liLockOther" style="display: none;"><img alt="无权解锁" src="image/tree/lock.png"/>无权解锁</li>
+    </ul>
+</div>
+</body>
+</html>

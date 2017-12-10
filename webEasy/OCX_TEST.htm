@@ -1,0 +1,98 @@
+<HTML>
+<HEAD>
+<TITLE>MyActiveX - Methods, Properties, and Events</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=gbk">
+<SCRIPT FOR=MyActiveX1 EVENT=OnRecordInfo_Query_Result(pxml)>
+showXml(pxml);
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var flag = true;
+function showXml(xml){
+	document.getElementById("txaXml").value = xml;
+}
+function showResult(msg){
+	var txaResult = document.getElementById("txaResult");
+	txaResult.value = new Date()+": "+msg + "\n" + txaResult.value;
+}
+function loadOcx(){
+	txaResult = document.getElementById("txaResult").value="";
+	showXml("");
+	//8E46037B-3676-4065-AC5A-671E86A82870   ocx
+	var result = MyActiveX1.ITMS_CCTV_MediaInit("23010100004000000001",
+									0,
+									5090,
+									"12345678a",
+									"172.17.4.11",
+									"23010100002000000001",
+									5060);
+	showResult("初始化 ocx："+result);
+	
+	/*
+	result = MyActiveX1.ITMS_CCTV_MediaRegister(1800);
+	showResult("注册 ocx："+result);
+	
+	MyActiveX1.ITMS_CCTV_ScreenSwitch(1, 0);
+	showResult("分屏 ocx："+result);
+	*/
+	/*
+	setTimeout(function(){
+		
+		
+	},3000);
+	*/
+}
+
+function PassParameter()
+{
+	try{
+		if(flag){
+			loadOcx();
+			flag = false;
+		}
+		showXml("");
+		result = MyActiveX1.ITMS_CCTV_RecordQuery(9, "23010100001310000002", "2016-08-08T12:06:17", "2016-08-08T15:00:17", "64010000002100000001", "Address1", "23010100001310000002", 0, 0);
+		showResult("查询 ocx："+result);
+	}catch(e){
+		alert(e.message);
+	}
+}
+
+function uninstall() {
+    try {
+    	alert();
+    	//停止
+        MyActiveX1.ITMS_CCTV_StopPreview(0);
+    	showResult("停止视频成功！销毁(1/4)");
+        //注销
+        MyActiveX1.ITMS_CCTV_MediaUnRegister();
+        showResult("注销 OCX 成功！销毁(2/4)");
+        //释放
+        MyActiveX1.ITMS_CCTV_FreeScreen();
+        showResult("释放屏幕成功！销毁(3/4)");
+        //释放
+        MyActiveX1.ITMS_CCTV_MediaFree();
+        showResult("释放媒体成功！销毁(4/4)");
+    } catch (e) {
+        showResult("退出OCX:"+e.message);
+    }
+}
+
+</SCRIPT>
+
+</HEAD>
+<BODY>
+	<button ONCLICK=PassParameter()>调用 ocx</button><br/>
+	结果集返回：<br/>
+	<textarea id="txaResult" rows="5" style="width:100%"></textarea><br/>
+	格式体返回：<br/>
+	<textarea id="txaXml" rows="20" style="width:100%"></textarea><br/>
+	
+	<OBJECT ID="MyActiveX1" WIDTH=350 HEIGHT=50 border="1"
+		CLASSID="CLSID:8E46037B-3676-4065-AC5A-671E86A82870">
+		<PARAM NAME="_Version" VALUE="65536">
+		<PARAM NAME="_ExtentX" VALUE="2646">
+		<PARAM NAME="_ExtentY" VALUE="1323">
+		<PARAM NAME="_StockProps" VALUE="0">
+	</OBJECT>
+</BODY>
+</HTML>

@@ -1,0 +1,75 @@
+#tabsbottom{
+	float: left;
+	margin-top: 10px;
+	list-style: none;
+}
+#tabsbottom li{
+	float: left;
+	margin-left: 20px;
+}
+img,button{
+  cursor: pointer;
+}
+
+#historyWindow{
+	width: 298px;
+	height: 280px;
+	background: #e1e1e1;
+	position: absolute;
+	bottom: 0;
+	left: 1px;
+	z-index: 10;
+	display: none;
+}
+#historyWindow ul{
+	margin-left: -10px;
+	list-style: none;
+}
+
+#historyWindow ul li{
+	margin-top: 15px;
+	height: 30px;
+	line-height: 30px;
+}
+.date2 input,.date3 input,.date4 input{
+	width: 20px;
+	margin-left: 2px;
+}
+.date2 span,.date3 span{
+	margin-left: 2px;
+}
+.yesOrNot{
+	margin-top: 20px;
+	text-align: center;
+}
+#sure,#cancel{
+	margin-left: 10px;
+}
+
+#changeWindow{
+	width: 298px;
+	height: 280px;
+	background: #e1e1e1;
+	position: absolute;
+	bottom: 0;
+	left: 1px;
+	z-index: 10;
+	display: none;
+}
+#changeWindow ul{
+	margin-top: 10px;
+	list-style: none;
+}
+
+#changeWindow ul li{
+	margin-top: 30px;
+	height: 30px;
+	line-height: 30px;
+}
+.yesOrNots{
+	margin-top: 30px;
+	text-align: center;
+}
+#sures,#cancels{
+	margin-right: 30px;
+}

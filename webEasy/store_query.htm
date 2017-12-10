@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<TITLE>查询录像时段</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=gbk">
+<script type="text/javascript" src="js/initcfg.js"></script>
+<script type="text/javascript" src="js/ocxCommon.js"></script>
+<script type="text/javascript">
+
+function queryXml(){
+	try{
+		initOcx();
+		showXml("");
+		result = bocoVedioOcx.ITMS_CCTV_RecordQuery(9, "23010100001310000002", "2016-08-08T12:06:17", "2016-08-08T15:00:17", "64010000002100000001", "Address1", "23010100001310000002", 0, 0);
+		log("结果："+result,"查询");
+	}catch(e){
+		alert("ABC:"+e.message);
+	}
+}
+</script>
+<SCRIPT FOR=bocoVedioOcx EVENT=OnRecordInfo_Query_Result(pxml)>
+showXml(pxml);
+ITMS_CCTV_RecordQuery_Handler(pxml); //方法调用
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+function showXml(xml){
+	document.getElementById("txaXml").value = xml;
+}
+function showResult(msg){
+	var txaResult = document.getElementById("txaResult");
+	txaResult.value = new Date()+": "+msg + "\n" + txaResult.value;
+}
+function uninstall() {
+    try {
+    	//alert();
+    	if(!ocxIsNotInit){
+	    	//停止
+	        bocoVedioOcx.ITMS_CCTV_StopPreview(0);
+	    	showResult("停止视频成功！销毁(1/4)");
+	        //注销
+	        bocoVedioOcx.ITMS_CCTV_MediaUnRegister();
+	        showResult("注销 OCX 成功！销毁(2/4)");
+	        //释放
+	        bocoVedioOcx.ITMS_CCTV_FreeScreen();
+	        showResult("释放屏幕成功！销毁(3/4)");
+	        //释放
+	        bocoVedioOcx.ITMS_CCTV_MediaFree();
+	        showResult("释放媒体成功！销毁(4/4)");
+    	}
+    } catch (e) {
+        showResult("退出OCX:"+e.message);
+    }
+}
+
+</SCRIPT>
+
+</HEAD>
+<BODY onunload="uninstall();">
+	<button onclick="queryXml();"">调用 ocx2</button><br/>
+	结果集返回：<br/>
+	<textarea id="txaResult" rows="5" style="width:100%"></textarea><br/>
+	格式体返回：<br/>
+	<textarea id="txaXml" rows="20" style="width:100%"></textarea><br/>
+	
+	<OBJECT ID="bocoVedioOcx" WIDTH=350 HEIGHT=50 border="1"
+		CLASSID="CLSID:8E46037B-3676-4065-AC5A-671E86A82870">
+		<PARAM NAME="_Version" VALUE="65536">
+		<PARAM NAME="_ExtentX" VALUE="2646">
+		<PARAM NAME="_ExtentY" VALUE="1323">
+		<PARAM NAME="_StockProps" VALUE="0">
+	</OBJECT>
+</BODY>
+</HTML>

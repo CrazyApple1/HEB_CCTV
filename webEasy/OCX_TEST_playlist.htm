@@ -1,0 +1,221 @@
+<HTML>
+<HEAD>
+<TITLE>四分屏测试代码</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=gbk">
+
+<SCRIPT LANGUAGE="JavaScript">
+var stepStopMis = 0; //bye 调用间隔毫秒数
+var stepPlayMis = 0; //invite 调用间隔毫秒数
+var scrCnt = 4; //分屏数
+//设置播放的通道号，8 个通道
+var arrChannels = [
+		"11010000001310000001",
+		"11010000001310000002",
+		"11010000001310000001",
+		"11010000001310000001",
+		"11010000001310000001",
+		"11010000001310000001",
+		"11010000001310000001",
+		"11010000001310000001"
+];
+function log4Ocx(msg){
+	var txaResult = document.getElementById("txaResult");
+	var date = new Date();
+	var timeStr = (date.getHours()>9?"":"0")+date.getHours()+":"
+	+(date.getMinutes()>9?"":"0")+date.getMinutes()+":"
+	+(date.getSeconds()>9?"":"0")+date.getSeconds()+"."
+	+(date.getMilliseconds()>9?"":"0")+(date.getMilliseconds()>99?"":"0")+date.getMilliseconds();
+	txaResult.value = timeStr+": "+msg + "\n" + txaResult.value;
+}
+function clearLog(){
+	document.getElementById("txaResult").value = "";
+}
+function main2(){
+	var seq = 0;
+	//1.装载
+	setTimeout(function(){
+		install();
+	},seq*1000);
+	
+	//2.invite all
+	seq += 0;
+	setTimeout(function(){
+		playAll(0,1);
+	},seq*1000);
+
+	//2.bye all
+	seq += 4*stepPlayMis/1000+2;
+	setTimeout(function(){
+		stopAll(0);
+	},seq*1000);
+	
+	//3.卸载
+	seq += 4*stepStopMis/1000+10;
+	setTimeout(function(){
+		uninstall();
+	},seq*1000);
+	
+	//4.装载
+	seq += 1;
+	setTimeout(function(){
+		install();
+	},seq*1000);
+
+	//5.invite all
+	seq += 1;
+	setTimeout(function(){
+		playAll(0,2);
+	},seq*1000);
+
+	seq += 4*stepPlayMis/1000+1;
+	setTimeout(function(){
+	log4Ocx("运行完成！");
+	},seq*1000);
+}
+
+function main1(){
+	var seq = 0;
+	//1.装载
+	setTimeout(function(){
+		install();
+	},seq*1000);
+	
+	//2.bye all
+	seq += 0;
+	setTimeout(function(){
+		stopAll(0);
+	},seq*1000);
+	
+	//3.卸载
+	seq += 4*stepStopMis/1000+1;
+	setTimeout(function(){
+		uninstall();
+	},seq*1000);
+	
+	//4.装载
+	seq += 1;
+	setTimeout(function(){
+		install();
+	},seq*1000);
+
+	//5.invite all
+	seq += 1;
+	setTimeout(function(){
+		playAll(0,1);
+	},seq*1000);
+
+	seq += 4*stepPlayMis/1000+1;
+	setTimeout(function(){
+	log4Ocx("运行完成！");
+	},seq*1000);
+}
+
+//停止四分屏中的播放
+function stopAll(index){
+	if(index < scrCnt){
+		setTimeout(function(){
+			try{
+				var rs = active4Ocx.ITMS_CCTV_StopPreview(index);
+				log4Ocx("bye"+index+" 视频："+rs);
+			}catch(e){
+				log4Ocx("bye"+index+" 视频："+e.message);
+			}
+			//递归调用
+			stopAll(index+1);
+		},stepStopMis);
+	}else{
+		return;
+	}
+}
+
+//停止四分屏中的播放
+function playAll(index,grp){
+	if(index < scrCnt){
+		setTimeout(function(){
+			channel = arrChannels[index+(grp-1)*scrCnt];
+			try{
+				var rs = active4Ocx.ITMS_CCTV_Preview(index,channel,6000, "", 0, "");
+				log4Ocx("invite"+grp+"."+index+" 通道号="+channel+" 调用结果="+rs);
+			}catch(e){
+				log4Ocx("invite"+grp+"."+index+" 通道号="+channel+" ，ERROR："+e.message);
+			}
+			//递归调用
+			playAll(index+1,grp);
+		},stepPlayMis);
+	}else{
+		return;
+	}
+}
+
+//安装 ocx
+function install(){
+	//8E46037B-3676-4065-AC5A-671E86A82870   ocx
+	var result = active4Ocx.ITMS_CCTV_MediaInit("11010000004000000001",
+									0,
+									5090,
+									"12345678a",
+									//"172.17.4.11",
+									"10.11.1.131",
+									"11010000002000000001",
+									5060);
+	log4Ocx("装载-初始化：调用结果 "+result);
+	result = active4Ocx.ITMS_CCTV_MediaRegister(1800);
+	log4Ocx("装载-注册：调用结果 "+result);
+	active4Ocx.ITMS_CCTV_ScreenSwitch(4, 0);
+	log4Ocx("装载-分屏：调用结果 "+result);
+}
+//卸载 ocx
+function uninstall() {
+    try {
+				var result = "";
+        //注销
+        result = active4Ocx.ITMS_CCTV_MediaUnRegister();
+        log4Ocx("卸载-反注册：调用结果 " + result);
+        //释放
+        result = active4Ocx.ITMS_CCTV_FreeScreen();
+        log4Ocx("卸载-释放屏幕：调用结果 " + result);
+        //释放
+        result = active4Ocx.ITMS_CCTV_MediaFree();
+        log4Ocx("卸载-释放媒体：调用结果 " + result);
+    } catch (e) {
+        log4Ocx("卸载OCX:"+e.message);
+    }
+}
+
+function onload(){
+	txtStepStopMis.value = 0;
+	txtStepPlayMis.value = 0;
+	clearLog();
+}
+
+</SCRIPT>
+
+</HEAD>
+<BODY onload="onload();">
+间隔(毫秒) invite :<input value="0" id="txtStepPlayMis" onchange="stepPlayMis=this.value" style="width:50px;"> 
+bye :<input value="0" id="txtStepStopMis" onchange="stepStopMis=this.value" style="width:50px;"><br/>
+
+<button onclick="main1();">Main1:A、C、D、A、B1</button>
+<button onclick="main2();">Main2:A、B1、C、D、A、B2</button>
+<button onclick="clearLog();">清理日志</button>
+<button onclick="install();">A.install</button>
+<button onclick="playAll(0,1);">B1.invite(第一组)</button>
+<button onclick="playAll(0,2);">B2.invite(第二组)</button>
+<button onclick="stopAll(0);">C.bye</button>
+<button onclick="uninstall();">D.uninstall</button>
+<pre>
+手动操作步骤 —— 第一步：A、B 第二步：C、D （接着循环第一步、第二步）
+</pre>
+	<br/>
+	日志：<br/>
+	<textarea id="txaResult" rows="5" style="width:100%"></textarea><br/>
+	
+	<OBJECT ID="active4Ocx" WIDTH="100%" HEIGHT=300 border="1"
+		CLASSID="CLSID:8E46037B-3676-4065-AC5A-671E86A82870">
+		<PARAM NAME="_Version" VALUE="65536">
+		<PARAM NAME="_ExtentX" VALUE="2646">
+		<PARAM NAME="_ExtentY" VALUE="1323">
+		<PARAM NAME="_StockProps" VALUE="0">
+	</OBJECT>
+</BODY>
+</HTML>

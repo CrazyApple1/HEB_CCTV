@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--录像信息的播放进度条的进度-->
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="plugin/jquery-ui-1.12.1.custom/jquery-ui.theme.min.css"/>
+    <link href="plugin/jquery-ui-1.12.1.custom/jquery-ui.structure.min.css"/>
+    <link href="plugin/jquery-ui-1.12.1.custom/jquery-ui.min.css" rel="stylesheet"/>
+    <script src="plugin/jquery-ui-1.12.1.custom/external/jquery/jquery.js" ></script>
+    <script src="plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <style>
+        #divPlayProgress { margin: 10px;  }
+        #divPlayProgress .ui-slider-range {  background: #357EE8; }
+    </style>
+</head>
+<body>
+    <div id="divPlayProgress" ></div>
+    <div style="width:50px;height: 50px;text-align: center;border:1px solid green">
+        <h3 id="h3Test">test</h3>
+    </div>
+    <div id="slider" style="margin-top: 30px;"></div>
+    <script>
+        $(document).ready(function(){
+//            $( "#divPlayProgress" ).slider();
+////              slide:customPro
+//            function customPro(){
+//            }
+            $( "#slider" ).slider();
+            //进度条的操作类
+            var PlayProgressCls=function(mId,mOcxId,mStartTime,mEndTime){
+                 var that=this;
+                 var v_totalTime=0;
+                 var v_cutTime=0;
+                 var v_Multiple=1;//默认倍速是1
+                 this.interval=null;
+                 this.init=function(){
+                     if(that.interval!=null){
+                         clearInterval(interval);
+                     }
+                     //避免注册多个定时器
+                     v_cutTime=0;
+                     v_Multiple=1; //默认倍速是
+                     v_totalTime=mEndTime-mStartTime;
+                     $("#"+mId).slider({
+                         orientation:"horizontal",
+                         range: "min",
+                         min:0,
+                         max:v_totalTime,
+                         start:that.customProStart,
+                         stop: that.customProEnd,
+                         classes: {
+                             "ui-slider-range": "highlight"
+                         }
+                     });
+                     that.interval=window.setInterval(that.autofun,1000);//开始定时器
+                 }
+                /*定时器的函数*/
+                this.autofun=function(){
+                    v_cutTime=v_cutTime+1*v_Multiple;//添加的倍速*1
+                    if(v_cutTime>=v_totalTime){
+                        v_cutTime=0;
+                        $( "#"+mId ).slider( "value" , v_totalTime );
+                        window.clearInterval(that.interval);
+                    }
+                    $( "#"+mId ).slider( "value" , v_cutTime );
+                    $("#h3Test").text(v_cutTime);
+                }
+                /*滑动监听，开始时，停止定时器*/
+                this.customProStart=function(){
+                    window.clearInterval(that.interval);
+                    that.interval=null;
+                    $("#h3Test").text("testStart");
+                }
+
+                /*滑动监听，结束时设置指定点播放*/
+                 this.customProEnd=function (){
+                     v_cutTime=$( "#"+mId ).slider( "value" );
+                     if(that.interval!=null){
+                         window.clearInterval(that.interval);
+                         that.interval=null;
+                     }else{
+                         that.interval=window.setInterval(that.autofun,1000);
+                     }
+                     $("#h3Test").text(v_cutTime);
+                 }
+
+                 this.pauseTime=function(){
+                     window.clearInterval(interval);
+                     alert("pauseTime");
+                 }
+                 this.playTime=function(){
+                     window.setInterval(autofun);
+                     alert("playTime");
+                 }
+                 this.playMultiple=function(m_Multiple){
+                     v_Multiple=md_Multiple;
+                     alert("playMultiple: cut X"+m_Multiple);
+                 }
+                 this.playBack=function(){
+                     v_cutTime=v_cutTime-1*v_Multiple;//默认回退一秒
+                     alert("playBack: "+v_Multiple);
+                 }
+                 this.playForword=function(){
+                     v_cutTime=v_cutTime+1*v_Multiple;//默认前进一秒
+                     alert("playForword: "+v_Multiple);
+                 }
+            }
+            var progressCls=new PlayProgressCls("divPlayProgress","",0,100);
+            progressCls.init();
+//          cls.test();
+        });
+    </script>
+</body>
+</html>

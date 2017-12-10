@@ -1,0 +1,28 @@
+ .imagesetscreen {margin-left:25px;margin-top:10px;}
+
+ /*#imagesetscreen1 hover*/
+
+ .mygrid {
+  position: relative;
+  width: 144px;
+  height: 144px;
+ }
+
+ .myrow {
+  width: 144px;
+  height: 48px;
+ }
+
+ .mycell {
+  float: left;
+  width: 48px;
+  height: 48px;
+ }
+img,button{
+  cursor: pointer;
+}
+/*button{*/
+  /*cursor: pointer;*/
+  /*color: white;*/
+  /*font-weight: bold;*/
+ /*}*/

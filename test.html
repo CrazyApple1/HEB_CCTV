@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-1.8.3.js"></script>
+</head>
+
+<body>
+    <div id="" style="position: absolute ">
+        <label>查询:</label>
+        <input type="text" placeholder="请输入关键字" style="text-indent: 5px;">
+        <button id="btnSchIP">查询ip</button>
+    </div>
+    <div id="cursor" style="width:200px; height:200px; background-color: #00b7ee; cursor:ne-resize;">
+    </div>
+    <select style="width:100px; heigth:50px;">
+        <option value="text">text</option>
+        <option value="wait">wait</option>
+        <option value="e-resize"> e-resize</option>
+        <option value="n-resize"> n-resize</option>
+        <option value="s-resize">s-resize</option>
+        <option value="sw-resize">sw-resize</option>
+        <option value="se-resize">se-resize</option>
+        <option value="no-drop">no-drop</option>
+        <option value="move"> move</option>
+        <option value="progress">progress</option>
+
+    </select>
+    <!--<video src="test.264"  type="video/264" width="400px" height="400px" autoplay></video>-->
+    <button>test</button>
+    <script>
+        var mDiv=document.createElement("DIV")
+        mDiv.id="divQS"
+        mDiv.style.width="40px";
+        mDiv.style.height="20px";
+        mDiv.style.background="#00ff00";
+        mDiv.style.position="absolute";
+        mDiv.style.display="block";
+        mDiv.style.left="100px";
+        mDiv.style.top="100px";
+        document.body.appendChild(mDiv);
+    </script>
+    <script>
+        var w = $(document).innerWidth();
+        var h = $(document).innerHeight();
+//        alert(w+ "  "+ h );
+        var w2= window.screen.width;
+        var h2 = window.screen.height;
+//        alert(w2+ "  "+ h2 );
+    </script>
+    <script>
+        $("#cursor").click(function(){
+            var cntStyle = $("select option:selected").val();
+            $( "#cursor" ).css("cursor",cntStyle);
+        })
+    </script>
+    <script>
+
+    </script>
+    <script language="JavaScript">
+        $( "#btnSchIP" ).click(function(){
+            function GetLocalIPAddr(){
+                var oSetting = null;
+                var ip = null;
+                oSetting = new ActiveXObject("rcbdyctl.Setting");
+                ip = oSetting.GetIPAddress;
+                 return ip;
+            }
+            document.write(GetLocalIPAddr()+"<br/>");
+            var test = "test";
+        });
+    </script>
+</body>
+</html>

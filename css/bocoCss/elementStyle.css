@@ -1,0 +1,103 @@
+/*自定义的右键点击效果的菜单 div*/
+#divTreeRMenu {
+    position: absolute;
+    display: none;
+    background-color:white;
+    color: black;
+    z-index: 5;
+    display: none;
+    border-radius: 5px;
+    /*border:1px solid  gray;*/
+}
+
+#divTreeRMenu ul {
+    padding: 0px;
+    margin: 0px;
+    border:1px solid  gray;
+    border-right:2px solid gray;
+}
+#ulTreeRMenu li{
+    list-style-type:none;
+    cursor:pointer;
+    font-size: 14px;
+    font-weight:bold;
+    background:#f6f6f6;
+    color:#0073ea;
+    padding:5px;
+    padding-left:10px;
+    padding-right:10px;
+    margin-left:0px;
+}
+#ulTreeRMenu li img{
+    padding-right:5px;
+}
+#ulTreeRMenu li:hover{
+    margin-left:0px;
+    background-color: #0073ea;
+    color:white;
+}
+/* 轮播列表样式  */
+
+#olPlayList li{*/
+	height:20px;
+	padding-top:2px;
+	padding-bottom:0px;
+    border:1px solid white;
+}
+
+/*轮播列表 */
+#turnPlayList{
+    font-family:"微软雅黑",sans-serif ;
+    padding:0px;
+}
+#turnPlayList li{
+    /*cursor:pointer;*/
+    font-family: "微软雅黑", "黑体", "宋体";
+    margin: 5px;
+    font-size: 14px;
+    color:black;
+    list-style: none;
+    height:20px;
+    padding-top:2px;
+    padding-bottom:2px;
+    border:1px solid white;
+    line-height:20px;
+}
+
+#turnPlayList li div{
+   width: 240px;
+   overflow: hidden;
+   white-space: nowrap;
+   text-overflow: ellipsis;
+}
+#turnPlayList li img{
+    vertical-align: middle;
+    margin-right: 1px;
+}
+#lblTimeInfo {
+    position: absolute;
+    font-weight:bold;
+    width: 24px;
+    height: 24px;
+    padding-left:0px;
+    padding-top:10px;
+    text-align:center;
+    align:center;
+    right: 7px;
+    top: 6px;
+    background: url('../../image/clock.png') no-repeat center;
+}
+
+#turnPlayList li[selected=selected]{
+    border:1px solid blue;
+}
+
+#turnPlayList li:hover{
+    border:1px solid orange;
+}
+
+.ui-tabs .ui-tabs-panel{
+	padding:5px;
+}
+
+

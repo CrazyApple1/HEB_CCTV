@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="jquery-1.8.3.js" type="text/javascript"></script>
+    
+    <script type="text/javascript">
+    	function validateRight(data){   		
+			$("#divClick").append(data.message); 
+			$("#divClick").append("setp 2,");  //②
+		}
+		
+        $(document).ready(function () {
+//            $(window).unload(function(){
+//                alert("unload");
+//            });
+//             $(window).resize(function(){
+//                 alert("resize");
+//             });
+			
+			$("#btn1").click(function(){
+				$("#divClick").append("setp 1,"); 
+				/*
+				var html = $.ajax({
+					url: "http://10.11.1.84:7001/HEB_CCTV_REDIS/cctvsssy/get?userId=013292&sbbh=10000005&_=1460733613716&callback=validateRight",  
+					async: false,
+					jsonpCallback:"validateRight",
+					dataType:"jsonp"
+					//success:validateRight
+				});
+				*/
+				//<script src="http://10.11.1.84:7001/HEB_CCTV_REDIS/cctvsssy/get?userId=013292&sbbh=10000005&_=1460733613716&callback=validateRight"></script>
+				validateRight({"code":"0","message":"查询成功","result":[{"bksd":"300000","jgbh":"","jglx":"","kssj":"2016-04-15 20:10:46","sbbh":"10000005","skqx":"","syr":"013292","syzt":""}]});
+			});
+        });
+       
+    </script>
+</head>
+<body>
+<div id="divClick" style="width:300px;heigth:300px;background-color:green;">
+&nbsp;
+</div>
+<input type="button" id="btn1" value="点击"/>
+</body>
+</html>

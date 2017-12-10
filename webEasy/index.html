@@ -1,0 +1,418 @@
+<!DOCTYPE html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=gbk">
+    <link href="css/control.css" rel="stylesheet"/>
+    <script type="text/javascript" src="js/initcfg.js"></script>
+    <script src="js/jquery-1.8.3.js"></script>
+    <title>单屏云台控制系统</title>
+</head>
+<style>
+	*{
+		margin:0px;
+		padding:0px;
+	}
+	#imgLeftAperture,#imgRightAperture,#btnOk{
+		padding:3px;
+		width:20px;
+	}
+    #divContainerer{background-color: #171315;}
+    .btn-ptz{width:50px;height:30px;font-size:10px;
+        background-color: #171315;
+        border-radius: 5px;
+        border: none;
+        font-weight: bold;
+        color:white;
+    }
+    body{
+    	padding:0px;
+    	margin:0px;
+    	overflow:hidden;
+    	/*
+    	color:white;
+    	background-color:black;
+    	*/
+    }
+    #mediaplayerid{
+    	z-index:-1;
+    	width:100%;
+    	height:100%;
+    	border:1px solid white;
+    }
+    #divContainer{
+    	display:inline;
+    	width:100%;
+    	height:100%;
+    }
+    #divViewMedia{
+    	float:left;
+    	width:100%;
+    	height:100%;
+    	border:0px solid black;
+    }
+    #divCtrlPnl{
+    	float:left;
+    	width:100%;
+    	height:30px;;
+    	border:none;
+    	top:0px;
+    	right:0px;
+    }
+    .lblTitle,legend,label{
+     font-size:13px;
+     font-weight:bold;
+    }
+    #txaLog{
+    	border:none;
+    }
+	#ulBtns{ 
+	  margin:0;padding:0;
+ 	}
+ 	#ulBtns li{ 
+	  display: inline-block; list-style-type:none;
+	  border:none;
+	  width: 25%;
+	  margin:0;
+      padding:0;
+ 	}
+ 	fieldset{
+ 		float:left;
+ 		width: %;
+ 		text-align:center;
+ 		/*
+ 		margin-top:10px;
+ 		padding:10px;
+ 		*/
+ 	}    
+</style>
+<script>
+	var mediaplayerobj = null;
+	var tagID="";
+	var imgpath_error = "img/error.png";
+	var imgpath_yes = "img/yes.gif";
+	var imgpath_empty = "img/empty.gif";
+	function getLog(){
+		return $("#txaLog").val();
+	}
+	//记录日志的方法
+	function log(msg,title){
+		var date = new Date();
+		var timeStr = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+"."+date.getMilliseconds();
+		if(title){
+			timeStr += "\r\n" + title + ":";
+		}
+		msg = "\r\n" + timeStr +"\r\n" + msg;
+		var oldMsg = $("#txaLog").val();
+		msg += oldMsg;
+		$("#txaLog").val(msg);
+	}
+	//传入id进行控制不能重复播放
+	function startPlay(ID){
+		try{
+		    if(tagID!==ID&tagID!==""){
+		        mediaplayerobj.ITMS_CCTV_StopPreview(0);
+		    }
+		    mediaplayerobj.ITMS_CCTV_Preview(0,ID,6000, "", 0, "");
+		    tagID=ID;
+		    log("正在播放 " + ID,"播放");
+		}catch(e){
+			log(e,"播放");
+		}
+	};
+    $(document).ready(function(event){
+    	mediaplayerobj = document.getElementById("mediaplayerid");
+    	$("#txaLog").val();
+        function queryStringByName(queryName) {
+            var str = location.href; //取得整个地址栏
+            alert(str);
+            if (str.indexOf("?") > -1) {
+                var queryParam = str.substring(str.indexOf("?") + 1);
+                //如果有多个参数
+                //if (queryParam.indexOf("&") > -1)
+                var param = queryParam.split("&");
+                for (var a = 0; a < param.length; a++) {
+                    var query = param[a].split("=");
+                    if (query[0] == queryName) {
+                        return query[1];
+                    }
+                }
+            }
+            return "";
+        };
+        function bodyResize() {
+            //$("#divViewMedia").height(document.body.scrollHeight);
+            //mediaplayerobj.height=$("#divViewMedia").height();
+            var width = $("#divViewMedia").width();
+            var height = $("#divViewMedia").height();
+            height = $(window).height()-$("#divCtrlPnl").height();
+            $("#divViewMedia").height(height);
+            $("#divViewMedia").width("100%");
+            //以上代码用于兼容 IE6,7,8,9,10,11
+            log("width:"+width+" height:"+height,"当前宽高")
+            try{
+                mediaplayerobj.ITMS_CCTV_ReSizeVideoDlg(0, 0, width, height);
+                log("画面设置大小化成功！","2/4.初始化 ITMS_CCTV_ReSizeVideoDlg");
+            }catch(e){
+				log(e.message);
+            }
+        }
+        function mediaplayinit() {
+            try {
+                mediaplayerobj.ITMS_CCTV_MediaInit(ocx_userid, ocx_clientip, ocx_clientport, ocx_userpwd, ocx_serverip, ocx_serverid, ocx_serverport);
+                log("媒体初始化成功！","1/4.初始化 ITMS_CCTV_MediaInit");
+                bodyResize();
+                setTimeout(function(){
+                    mediaplayerobj.ITMS_CCTV_ScreenSwitch(1, 0);
+                    log("媒体画面切换化成功！","3/4.初始化 ITMS_CCTV_ScreenSwitch");
+                    mediaplayerobj.ITMS_CCTV_MediaRegister(1800);
+                    log("OCX 注册成功！","4/4.初始化ITMS_CCTV_MediaRegister");
+                },500);
+
+            } catch (e) {
+                log(e,"初始化");
+            }
+        }
+        /*
+         * 版本更新后提示作用
+         */
+        function updateVersion(){
+            try{
+                //通过方法获得当前控件的版本，和服务器上更新的版本号对比
+                var currentVersionStr=mediaplayerobj.ITMS_28181_GetVersion();
+                //alert(currentVersionStr);
+                if(ocx_version!==currentVersionStr){
+                    $("#mediaplayerid").hide();
+                    $("#spanOcxTag").html("升级：本机媒体播放器版本为 "+currentVersionStr+" ，请下载更新至版本 "+ocx_version);
+                    //主动提示运行ocx控件
+                    //window.location.href="webEasy/setup.exe";
+                    //ocx_version=currentVersionStr;
+                }
+            }catch(e){
+            }
+        };
+        
+        function pertureaAndFocusClick(){
+            //光圈-
+            $("#imgLeftAperture").click(function(){
+                var tag=$("#imgLeftAperture").attr("ptz");
+                mediaplayerobj.ITMS_CCTV_PTZ_Command(tag,tagID, 0);
+            });
+            //光圈+
+            $("#imgRightAperture").click(function(){
+                var tag=$("#imgRightAperture").attr("ptz");
+                mediaplayerobj.ITMS_CCTV_PTZ_Command(tag,tagID, 0);
+            });
+        }
+        //云台的控制
+        function pTziinit(){
+            $("button[id^='PTZ']").on("mousedown", function () {
+                var ptz = $(this).attr("ptz");
+                $(this).css("backgroundColor","RoyalBlue");
+                onmousedownPTZ(ptz);
+            });
+            $("button[id^='PTZ']").on("mouseup",function () {
+                $(this).css("backgroundColor","black");
+                myonmouseup();
+            });
+        }
+        /***************PTZ控制*************/
+        function onmousedownPTZ(ptz) {
+            try{
+                mediaplayerobj.ITMS_CCTV_PTZ_Command(ptz,tagID, 0);
+            }catch(e){
+                log(e,"云台控制(进行)");
+            }
+        }
+        /*************结束PTZ控制**************/
+        function myonmouseup() {
+            try{
+                mediaplayerobj.ITMS_CCTV_PTZ_Command(6, tagID, 0);
+            }catch(e){
+                log(e,"云台控制(结束)");
+            }
+
+        }
+    	$("#imgDebug").click(function(){
+    		try{
+    			var log = $("#txaLog").val();
+    			window.clipboardData.setData("Text",log);
+    			$("#imgDebug").attr("src",imgpath_yes);
+    			$("#imgDebug").attr("title","日志已经复制到剪贴板！");
+    		}catch(e){
+    			$("#imgDebug").attr("title","异常："+e);
+    			$("#imgDebug").attr("src",imgpath_error);
+    		}
+    		//
+    		setTimeout(function(){
+    			$("#imgDebug").attr("title","");
+    			$("#imgDebug").attr("src",imgpath_empty);
+    		},3000)
+    	});
+    	$("#legLog").click(function(){
+    		$("#txaLog").toggle();
+    	});
+    	$("#btnTest").click(function(){
+    		//测试播放
+    		var devId = $("#selTest option:selected").val();
+    		if(devId != ""){
+	    		log("正在测试 "+devId,"测试");
+    			startPlay(devId);
+    		}
+    	});
+//        alert(tagID);
+        //var tagID="11010000001300000002";
+		//window.onbeforeunload = function(event) { 
+		//return confirm("确定离开此页面吗？"); 
+        $(window).on("beforeunload", function () {
+            try {
+            	//停止
+                mediaplayerobj.ITMS_CCTV_StopPreview(0);
+            	log("停止视频成功！","销毁(1/4)");
+                //注销
+                mediaplayerobj.ITMS_CCTV_MediaUnRegister();
+                log("注销 OCX 成功！","销毁(2/4)");
+                //释放
+                mediaplayerobj.ITMS_CCTV_FreeScreen();
+                log("释放屏幕成功！","销毁(3/4)");
+                //释放
+                mediaplayerobj.ITMS_CCTV_MediaFree();
+                log("释放媒体成功！","销毁(4/4)");
+            }
+            catch (e) {
+                log(e,"退出OCX");
+            }
+        });
+        $(window).on("resize", function (){
+        	bodyResize();
+        });
+
+        $("#selPreset").change(function () {
+            var tag = $("#selPreset option:selected").val();
+           	if(tag=="17"){
+           		$("#txtPosition").show();
+           	}else{
+           		$("#txtPosition").hide();
+           	}
+        });
+        $("#btnOk").click(function () {
+            var tag = $("#selPreset option:selected").val();
+            if(tag != ""){
+	            //设置预置位
+	            positionPreSet=tag;
+	            mediaplayerobj.ITMS_CCTV_PTZ_Command(tag,tagID, 0);
+            }
+        });
+        mediaplayinit();
+        //对光圈、焦距的初始化点击监听
+        updateVersion();//更新ocx的控件
+        pertureaAndFocusClick();
+        pTziinit();
+
+    });
+</script>
+<style type="text/css">
+
+</style>
+<body>
+    <!--视频播放部分-->
+    <div id="divContainer">
+        <div id="divCtrlPnl" style="width:100%;">
+        	<!-- 
+        	<fieldset>
+	        	<legend id="legCtrl">云台控制</legend>
+	        	<div style="width:100%;text-align:center;">
+	        		<button  id="PTZtop"   class="btn-ptz" ptz="2" >Ptz上</button>
+	        		<button  id="PTZbelow" class="btn-ptz" ptz="3" >Ptz下</button>
+	        		<button  id="PTZleft"  class="btn-ptz" ptz="0" >Ptz左</button>
+	        		<button  id="PTZright" class="btn-ptz" ptz="1" >Ptz右</button>
+		           	<ul id="ulBtns">
+						<li style="margin:0px;margin-left:0px;">&nbsp;</li>
+		            	<li><button  id="PTZtop"   class="btn-ptz" ptz="2" >Ptz上</button></li>
+		            	<li>&nbsp;</li>
+		            	
+		            	<li><button  id="PTZleft"  class="btn-ptz" ptz="0" >Ptz左</button></li>
+		            	<li>&nbsp;</li>
+		            	<li><button  id="PTZright" class="btn-ptz" ptz="1" >Ptz右</button></li>
+		            	
+		            	<li>&nbsp;</li>
+		            	<li><button  id="PTZbelow" class="btn-ptz" ptz="3" >Ptz下</button></li>
+		            	<li>&nbsp;</li>
+		            </ul>
+	            </div>
+            </fieldset>
+	                    <img id="imgLeftAperture" ptz="5" src="img/subtract.png"/>
+	                    <img id="imgRightAperture" ptz="4" src="img/add.png"/>
+            
+             -->
+            <img id="imgDebug" src="img/empty.gif"/>
+            <label>光圈:</label>
+            <button id="imgLeftAperture" ptz="5" >-</button>
+		    <button id="imgRightAperture" ptz="4" >+</button>
+		    <label>预置位:</label>
+		    <select id="selPositions">
+		    	<option value="">--预置位列表--</option>
+		    	<option value="test1">test1</option>
+		    	<option value="test2">test2</option>
+		    	<option value="test3">test3</option>
+		    </select>
+		    <select id="selPreset">
+		    	<option value="">-操作-</option>
+                <option value="17">添加</option>
+                <option value="18">调用</option>
+                <option value="19">删除</option>
+            </select>
+            <input id="txtPosition" style="display:none;width:60px;"/>
+            <button id="btnOk" style="height:25px;width:50px;">确定</button>
+            <span style="display:none;">
+            	<button id="btnTestPop">测试弹窗</button>
+	            <select id="selTest">
+	           		<option value="">--请选择--</option>
+	           		<option value="11010000001310000001">11010000001310000001</option>
+	           		<option value="11010000001310000010">11010000001310000010</option>
+	           		<option value="11010000001310000014">11010000001310000014</option>
+	           		<option value="11010000001310000018">11010000001310000018</option>
+	           	</select>
+	           	<button id="btnTest" style="height:100%;width:100px;">测试播放</button>
+	           	<textarea id="txaLog" rows="2" cols="100" style="font-size:12px;display:inline;"></textarea>
+           	</span>
+            <!-- <fieldset style="padding:0px;height:100%;">
+	        	<legend id="legCtrl">光圈</legend>
+	        	<div style="display:inline;">
+	                <div style="float:left;" valign="middle">
+		                <button id="imgLeftAperture" ptz="5" >-</button>
+		                <button id="imgRightAperture" ptz="4" >+</button>
+	                </div>
+	            </div>
+	        </fieldset>
+	        <fieldset style="padding:0px;height:100%;">
+	        	<legend id="legCtrl">预置位</legend>
+	            <div style="display:inline;float:left;" valign="middle">
+                    <select id="selectPreset" style="width:100%;">
+                        <option value="17">预置</option>
+                        <option value="18">调用</option>
+                        <option value="19">删除</option>
+                    </select>
+                </div>
+	        </fieldset> -->
+            
+            <fieldset style="display:none;">
+        		<legend id="legLog" align="right">运行日志</legend>
+        		
+        	</fieldset>
+        </div>
+        <div id="divViewMedia">
+			<OBJECT  ID="mediaplayerid" HEIGHT="400" CLASSID="CLSID:8E46037B-3676-4065-AC5A-671E86A82870">
+			</OBJECT>
+            <div  style="margin:10px;padding:30px;border:1px solid gray;">
+                <span id="spanOcxTag" style="padding:10px;font-size:12px;color:red;width:100%;text-align:center">提示：您当前的媒体播放器不能正常工作。</span>
+                <ol style="font-size:12px;color:black;padding:30px;display:block;">
+                	<li>必须以管理员身份安装 OCX 媒体播放器。</li>
+                    <li>请确保您使用的浏览器是 IE8+ 以上，兼容 IE8,9,10,11 浏览器。</li>
+                    <li>请确保您在安装过程中关闭浏览器。</li>
+                    <li>请确保您已经安装好 OCX 媒体播放器。若没安装，请<a href="setup.exe" target="_blank">下载</a>并安装，安装完成后请刷新或重新打开 IE。</li>
+                </ol>
+                <sub>亿阳信通股份有限公司-城市交通产品线</sub>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

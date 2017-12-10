@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script type="text/javascript">
+		function call(a,b){
+			alert(a+b);
+		}
+	</script>
+	<script type="text/javascript" language="JavaScript" for="dhMediaPlayerId" event="DownloadEvent(TotalSize,DownloadSize)">
+		console.log(TotalSize,DownloadSize);
+	</script>
+</head>
+
+<body>
+	<OBJECT id="dhMediaPlayerId" CLASSID="CLSID:94F5E9A5-6AA6-4D75-9321-C085E8209DFF"></OBJECT>
+	<input type="button" value="下载录像" id="beginDownLoad" onclick="downLoad()"/>
+	<input type="button" name="" id="" value="停止下载" onclick="stop()" />
+	<input type="button" name="" id="" value="登录" onclick="login()" />
+</body>
+
+	<script type="text/javascript">		
+	var WshShell=new ActiveXObject("WScript.Shell");
+	//添加信任站点ip
+	WshShell.RegWrite("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\Ranges\\Range100\\","");
+	WshShell.RegWrite("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\Ranges\\Range100\\http","2","REG_DWORD");
+	WshShell.RegWrite("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\Ranges\\Range100\\:Range","192.168.1.5");
+			
+			function login() {
+			try {
+				var ret = dhMediaPlayerId.DevLogin('172.17.63.10', '37777', 'admin', "admin");
+				if(ret == 0) {
+					alert("登录失败")
+				} else {}
+			} catch(e) {
+				alert(e);
+			}
+		}
+
+		function downLoad() {
+
+			try {
+				var ret = dhMediaPlayerId.DownloadByTime('1', '2016', '12', '6', '8', '8', '8', '8', '10', '0', "d:\\122221.mp4");
+				if(ret == 0) {
+					alert("下载失败");
+				}
+			} catch(e) {
+				alert(e);
+				//TODO handle the exception
+			}
+		}
+
+		function stop() {
+			dhMediaPlayerId.StopDownload();
+		}
+	</script>
+
+</html>

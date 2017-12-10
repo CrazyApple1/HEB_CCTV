@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ifm_test.html</title>
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+<meta http-equiv="description" content="this is my page">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="js/jquery-1.8.3.js"></script> 
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#btnTest").click(function(){
+			var devId = $("#selTest option:selected").val();
+			if(devId != ""){
+				var ifm = document.getElementById("ifm").contentWindow;
+				ifm.startPlay(devId);
+			}
+			$("#btnLog").click();
+		});
+		$("#btnLog").click(function(){
+			var ifm = document.getElementById("ifm").contentWindow;
+			var log = $(ifm.document).find("#txaLog").val();
+			$("#txaLog").val(log);
+		});
+	});
+	</script>
+</head>
+
+<body>
+	<select id="selTest">
+		<option value="">--请选择--</option>
+		<option value="11010000001310000001">11010000001310000001</option>
+		<option value="11010000001310000002">11010000001310000002</option>
+		<option value="11010000001310000010">11010000001310000010</option>
+		<option value="11010000001310000014">11010000001310000014</option>
+		<option value="11010000001310000018">11010000001310000018</option>
+	</select>
+	<button id="btnTest" style="height:100%;width:100px;">测试播放</button>
+	<button id="btnLog" style="height:100%;width:100px;">刷新日志</button>
+	<br/>
+	<iframe id="ifm" name="ifm" src="index.html" width="530" height="450"></iframe>
+	<textarea id="txaLog" rows="30" cols="80"></textarea>
+	
+<!-- 	<iframe src="baidu.html" style="position:absolute;top:30px;left:0px;z-index:999;"></iframe> -->
+
+</body>
+</html>

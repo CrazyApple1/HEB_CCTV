@@ -1,0 +1,135 @@
+html, body {
+    margin: 0px;
+    padding: 0px;
+}
+/*顶部的图片指示栏*/
+#divTitle {
+	height:50px;
+    top:0px;
+    background-color: #f0f0f0;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    clear: both;
+}
+/*头部左边的image div*/
+.title_img{
+    float:left;
+    vertical-align: middle;
+    margin: 0px;
+    padding: 0px;
+
+}
+/* 头部右边的div*/
+.title_user{
+    float:right;
+    margin-right: 20px;
+    margin-top: 10px;
+}
+/*用户名字*/
+.title_username{
+    padding: 10px;
+    font-size:14px;
+    text-align:center;
+}
+
+/*内容的div*/
+.content {
+	width:100%;
+    margin: 0px;
+    padding:0px;
+    font-size: 14px;
+    color: #454545;
+}
+.lblName{
+    font-weight: bold;
+	width:30%;
+	float:left;
+}
+/*左侧的视频的div*/
+.left {
+	width:70%;
+    float: left;
+    margin: 0px;
+    padding: 0px;
+    background-color: white;
+}
+/*视频控件的的宽高*/
+#mediaplayerid{
+    width:100%;
+}
+/*右边的大div*/
+.right {
+	width:28%;
+    float: left;
+    padding:0px;
+    margin: 0px;
+}
+/*上面的div*/
+.right_one{
+    padding-left:20px;
+    margin-top:20px;
+}
+/*下面的div*/
+.right_two{
+    padding-top: 10px;
+    padding-left:88px;
+    margin: 0px;
+}
+/*第一个div距离顶部的距离*/
+.right_one_top{
+    margin-top: 15px;
+
+}
+/*设备名字的显示*/
+.lblName_top{
+	width:60%;
+    display: inline-block;
+    padding: 5px;
+    font-size: 14px;
+    text-align: left;
+    border-radius: 2px;
+    border: 1px #c5c5c5 solid ;
+    color: #454545;
+    background-color: #f6f6f6;
+}
+/*下拉框*/
+.selClass_all{
+    text-align: center;
+    font-size: 14px;
+    border-radius: 2px;
+    border: 1px #c5c5c5 solid ;
+    background-color:#f6f6f6;
+    color: #454545;
+}
+.selClass_all:hover{
+    border: 1px #007fff solid ;
+    border-radius: 2px;
+}
+
+/*内容框*/
+.txaContent{
+    overflow: hidden;
+    border: 1px #c5c5c5 solid;
+    border-radius: 2px;
+}
+.txaContent:hover{
+    border: 1px #007fff solid;
+    border-radius: 2px;
+}
+/*提交的div*/
+.right_submit{
+	text-align:center;
+}
+/*提交的按钮相同样式*/
+.btn{
+	margin:30px 10px;
+	padding:5px 15px ;
+    font-weight: bold;
+    background-color:#959595;
+    color: white;
+    border-radius: 2px;
+}
+.btn:hover{
+    background-color: #007fff;
+}

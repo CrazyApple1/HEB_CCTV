@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../css/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/layout-default.css" />
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #divCenter {
+            width: 100%;
+        }
+        
+        #controler {
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        #divCenter input,
+        #controler input {
+            font-size: 14px;
+            margin-left: 5px;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-weight: normal;
+        }
+        
+        #playBackInfo {
+            text-align: center;
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        .ui-layout-pane {
+            border: none !important;
+            padding: 0 !important;
+        }
+        .ui-layout-north{
+        	padding: 8px 0 !important;
+        }
+    </style>
+    <script src="../js/My97DatePicker/WdatePicker.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/jquery-1.8.3.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/jquery.layout-latest.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/bocojs/dhocxcfg.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        var DHmediaplayerobj;
+        // 当前播放速度
+        var nowSpeed = 0;
+        // 是否在进行回放的标识
+        var isPlay = true;
+
+        function nowPlaySpeed() {
+            if (nowSpeed > 0 && nowSpeed <= 4) {
+                $("#playBackInfo").html("快放 X" + nowSpeed);
+            } else if (nowSpeed == 0) {
+                $("#playBackInfo").html("正常播放");
+            } else if (nowSpeed < 0 && nowSpeed > -5) {
+                $("#playBackInfo").html("慢放 X" + (-nowSpeed));
+            }
+        }
+        //获取参数，获得录像信息
+        $(document).ready(function() {
+            DHmediaplayerobj = document.getElementById('dhMediaPlayerId');
+            // 快速回放,每调用一次加快一倍，最高到每秒200帧时停止加快，只对播放历史视频有效
+            $("#quicklyBack").on("click", function() {
+                //快速回放时判断当前是否暂停状态，如果暂停就先播放，然后再加速
+                if (!isPlay) {
+                    pauseBack();
+                    isPlay = true;
+                }
+                if (nowSpeed < 4) {
+                    nowSpeed++;
+                    nowPlaySpeed();
+                    DHmediaplayerobj.FastPlayBack();
+                }
+            });
+            // 慢速回放，每调用一次减慢一倍，最慢为每秒一帧，只对播放历史视频有效
+            $("#slowlyBack").on("click", function() {
+                //快速回放时判断当前是否暂停状态，如果暂停就先播放，然后再加速
+                if (!isPlay) {
+                    pauseBack();
+                    isPlay = true;
+                }
+
+                if (nowSpeed > -4) {
+                    nowSpeed--;
+                    nowPlaySpeed();
+                    DHmediaplayerobj.SlowPlayBack();
+                }
+            });
+            // 从快放或者慢放中恢复正常速度播放
+            $("#normallyBack").on("click", function() {
+                //快速回放时判断当前是否暂停状态，如果暂停就先播放，然后再加速
+                if (!isPlay) {
+                    pauseBack();
+                    isPlay = true;
+                }
+                $("#playBackInfo").html("正常播放");
+                DHmediaplayerobj.NormalPlayBack();
+            });
+
+            //暂停按钮的执行方法
+            function pauseBack() {
+                if (isPlay) {
+                    if ($("#playBackInfo").html() == "播放暂停") {} else {
+                        pauseHtml = $("#playBackInfo").html();
+                    }
+                    DHmediaplayerobj.PausePlayBack(1);
+                    $("#pausePlay").val("继续回放");
+                    $("#playBackInfo").html("播放暂停");
+                    isPlay = false;
+                } else {
+                    DHmediaplayerobj.PausePlayBack(0);
+                    $("#pausePlay").val("暂停回放");
+                    $("#playBackInfo").html(pauseHtml);
+                    isPlay = true;
+                }
+            }
+            
+            //暂停
+            $("#pausePlay").on("click", function() {
+                pauseBack();
+            });
+            
+            //选择日期后开始播放
+            $("#beginPlay").bind('click',beginPlay)
+        })
+        
+        
+        function beginPlay(){
+        	//当前选中的通道号
+        	var channel=$("#selectChanel option:selected").val();
+        	//获取开始日期，时间
+        	var startDate=$("#staDAte").val();
+        	//判断开始时间或者结束时间是否为空，如果为空进行提示
+        	if(startDate==""){
+        		alert("请选择查询开始时间");
+        	}
+        	//获取结束日期，时间
+        	var endDate=$("#endDate").val();
+        	//判断结束时间是否为空，如果为空进行提示
+        	if(endDate==""){
+        		alert("请选择查询结束时间");
+        	}
+            //获取接收到数据，放到数组，用以获取开始年月
+            var tm1 = startDate.split('-');
+            //获取开始日
+            var tm2 = tm1[2].split(' ');
+            //获取开始时间
+            var tm3 = tm2[1].split(':');
+            //获取结束时间
+            var tm4 = endDate.split('-')[2].split(' ')[1].split(':');
+            //播放
+            try {
+            	setTimeout(function(){
+            		DHmediaplayerobj.PlayBackByTime(tm1[0], tm1[1], tm2[0], tm3[0], tm3[1], tm3[2], tm4[0], tm4[1], tm4[2],channel);
+            	},2000)
+               
+            } catch (e) {
+            	alert(e);
+            }
+        }
+
+        //改变视口大小时，视频界面也做相应的调整
+        $(window).on("resize", function() {
+            bodyResize();
+        });
+
+        function bodyResize() {
+            try {
+                var width = $(window).width();
+                var height =$("#divCenter").height();
+				setTimeout(function(){
+					DHmediaplayerobj.SetPlayWndSize(width, height);
+				},1000)
+            } catch (e) {};
+
+        }
+
+        function playBack(tm) {
+        	$("#divCenter").height($(window).height() - $("#controler").innerHeight()-$("#selectDate").innerHeight());
+        	//调用此方法之后将选择通道号和时间控件禁用
+        	$("#selectChanel").attr("disabled","disabled");
+        	$("#selectDate input").attr("disabled","disabled");
+        	$("#selectChanel").append("<option>"+tm[3]+"</option>");
+        	$("#selectDate input:nth-of-type(1)").val(tm[5]);
+        	$("#selectDate input:nth-of-type(2)").val(tm[6]);
+            //视频视口大小
+            bodyResize();
+            //登录
+            setTimeout(function() {
+                login(tm[0], '37777', tm[1], tm[2]);
+            }, 1000);
+
+            //获取接收到数据，放到数组，用以获取开始年月
+            var tm1 = tm[5].split('-');
+            //获取开始日
+            var tm2 = tm1[2].split(' ');
+            //获取开始时间
+            var tm3 = tm2[1].split(':');
+            //获取结束时间
+            var tm4 = tm[6].split('-')[2].split(' ')[1].split(':');
+            
+            //playbackbytime传入的参数
+            var Year=tm1[0];
+            var startMon=tm1[1];
+            var startDay=tm2[0];
+            var startHH=tm3[0];
+            var startSS=tm3[1];
+            var startMM=tm3[2];
+            var endHH=tm4[0];
+            var endSS=tm4[1];
+            var endMM=tm4[2];
+            var Channel=tm[3];
+            //播放
+            //				console.log(tm1[0]);
+            setTimeout(function() {
+                try {
+                    DHmediaplayerobj.PlayBackByTime(Year, startMon, startDay, startHH, startSS, startMM, endHH, endSS, endMM, Channel);
+                } catch (e) {
+                	alert(e);
+                }
+            }, 2000)
+        }
+        
+        
+        function playBackCustom(bayonetNumber) {
+        	$("#divCenter").height($(window).height() - $("#controler").innerHeight()-$("#selectDate").innerHeight());
+            //视频视口大小
+            bodyResize();
+            var murl=urlICMS+"servlet/VmcsCommonServlet?action=findKakouChannels&kkbh="+bayonetNumber[0];
+        	//后台传入的通道号插入下拉框
+        	$.ajax({
+        		type:"get",
+        		url:murl,
+        		async:true,
+        		dataType:"jsonp",
+        		success:function(data){
+        			var td=data.info.channelList;
+					//获取到select标签
+					var tdSelect=document.getElementById("selectChanel");
+					$('#selectChanel').empty();
+					//将option选项填充到select标签中
+				    for(i=0;i<td.length;i++){
+				    	var tdOption=document.createElement('option');
+				      	tdOption.setAttribute('value',td[i].channel);
+				      	tdOption.innerHTML=td[i].channel;
+				      	tdSelect.appendChild(tdOption);
+				    }
+				    try{
+						//停止播放
+						DHmediaplayerobj.StopRealPlay();
+					}catch(e){
+						// handle the exception
+					}
+					try{
+						//退出ocx登录
+							DHmediaplayerobj.DevLoginOut();
+					}catch(e){
+						// handle the exception
+					}
+					try{
+						//获取新的ip，端口，用户名，密码重新登录
+						setTimeout(function(){
+							login(data.info.ip,37777,data.info.devuserid,data.info.devuserpwd);
+						},1000);
+					}catch(e){
+						// handle the exception
+					}
+        		}
+       		});
+        }
+
+        //登录函数
+        function login(serverip, serverport, userid, userpwd) {
+            try {
+                var ret = DHmediaplayerobj.DevLogin(serverip, serverport, userid, userpwd);
+                if (ret == 0) {
+                    alert("登录失败")
+                } else {}
+            } catch (e) {}
+        }
+
+        //layout布局
+        $(document).ready(function() {
+            $('body').layout({
+                slidable: true,
+                resizerTip: "调整视频窗口大小",
+                togglerTip_open: "关闭", //窗口打开时，当鼠标移动到边框上按钮上，显示的提示语  
+                togglerTip_closed: "打开", //窗口关闭时，当鼠标移动到边框上按钮上，显示的提示语
+                togglerAlign_open: "center", //窗口打开时，边框按钮显示的位置  
+                togglerAlign_closed: "center", //窗口关闭时，边框按钮显示的位置  
+                slideTrigger_open: "click", //在某个窗口隐藏后，鼠标触发其显示的事件。(click", "dblclick", "mouseover)  
+                slideTrigger_close: "click", //在某个窗口隐藏后，鼠标触发其关闭的事件。("click", "mouseout") 
+                sliderCursor: "pointer", //在某个窗口隐藏后，当鼠标移到边框上时的指针样式。  
+                onresize: bodyResize
+            })
+        })
+    </script>
+</head>
+
+<body>
+    <!--顶部选择查询范围-->
+    <div class="ui-layout-north" id="selectDate">
+    	<label for="">通道号：</label>
+    	<select id="selectChanel" >
+        </select>
+        <label for="">录像时段</label>
+        <input id="staDAte" type="text" onClick="WdatePicker({readOnly:true,autoPickDate:false,startDate:'',dateFmt:'yyyy-MM-dd HH:mm:ss',alwaysUseStartDate:false})" />
+        <label for="">-</label>
+        <input id="endDate" type="text" onClick="WdatePicker({readOnly:true,autoPickDate:false,startDate:'',dateFmt:'yyyy-MM-dd HH:mm:ss',alwaysUseStartDate:false})" />
+    </div>
+    <!--录像播放区域-->
+    <div id="divCenter" class="ui-layout-center" style="background: black;">
+        <div id="ocxContain" style="width: 100%; height: 100%;overflow: hidden;">
+            <OBJECT id="dhMediaPlayerId" CLASSID="CLSID:94F5E9A5-6AA6-4D75-9321-C085E8209DFF"></OBJECT>
+        </div>
+    </div>
+    <!--播放控制区域-->
+    <div id="controler" class="ui-layout-south">
+        <div id="playBackInfo">正常播放</div>
+        <input type="button" value="快速回放" id="quicklyBack">
+        <input type="button" value="慢速回放" id="slowlyBack">
+        <input type="button" value="正常回放" id="normallyBack">
+        <input type="button" value="暂停回放" id="pausePlay">
+        <input type="button" value="开始回放" id="beginPlay"/>
+    </div>
+</body>
+
+</html>
